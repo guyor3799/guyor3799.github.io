@@ -30,6 +30,9 @@
             .pulse-soft {
                 animation: pulse-soft 2s infinite;
             }
+            .bounce-in {
+                animation: bounce-in 0.5s ease-out;
+            }
             @keyframes pulse {
                 0% { transform: scale(1); }
                 50% { transform: scale(1.05); }
@@ -39,6 +42,11 @@
                 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
                 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
                 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            }
+            @keyframes bounce-in {
+                0% { transform: scale(0.8); opacity: 0; }
+                70% { transform: scale(1.05); }
+                100% { transform: scale(1); opacity: 1; }
             }
             .rank-gold {
                 background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
@@ -52,10 +60,10 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen font-sans">
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <!-- 开始界面 -->
-        <div id="start-screen" class="text-center py-10">
+        <div id="start-screen" class="text-center py-10 bounce-in">
             <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-primary mb-6">文学知识问答</h1>
             <p class="text-gray-600 mb-8">挑战你的文学素养，测试对经典文学的了解程度！</p>
             
@@ -63,7 +71,7 @@
                 <img src="https://picsum.photos/id/24/800/500" alt="书架上的经典文学书籍" class="w-full h-full object-cover">
             </div>
             
-            <button id="start-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300">
+            <button id="start-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
                 开始挑战 <i class="fa fa-arrow-right ml-2"></i>
             </button>
             <button id="ranking-btn" class="mt-4 bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full transition-all duration-300 border border-primary">
@@ -85,13 +93,13 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all duration-300 hover:shadow-xl">
                 <h2 id="question" class="text-xl font-bold mb-5"></h2>
                 <div id="options" class="space-y-3">
                     <!-- 选项将动态生成 -->
                 </div>
                 
-                <!-- 增强版答案提示按钮 -->
+                <!-- 答案提示按钮 -->
                 <div class="mt-5 text-center">
                     <button id="hint-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-full text-sm transition-all duration-300 flex items-center justify-center mx-auto pulse-soft">
                         <i class="fa fa-lightbulb-o mr-2 text-yellow-200"></i> 提示 (剩余: <span id="hint-count" class="ml-1 font-bold">2</span>)
@@ -106,12 +114,12 @@
         <!-- 结束界面 -->
         <div id="end-screen" class="hidden text-center py-6">
             <h2 class="text-2xl font-bold text-primary mb-3">挑战完成！</h2>
-            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6 transform transition-all duration-300 hover:shadow-xl">
                 <p class="text-gray-600 mb-1">你的最终得分</p>
                 <p id="final-score" class="text-4xl font-bold text-secondary mb-3">0</p>
                 
                 <div class="mb-4">
-                    <button id="save-score-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 mr-2">
+                    <button id="save-score-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 mr-2 transform hover:scale-105">
                         <i class="fa fa-save mr-1"></i> 保存成绩
                     </button>
                     <button id="ranking-end-btn" class="bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full transition-all duration-300 border border-primary">
@@ -119,7 +127,7 @@
                     </button>
                 </div>
                 
-                <button id="restart-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-all duration-300">
+                <button id="restart-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                     再次挑战 <i class="fa fa-refresh ml-1"></i>
                 </button>
             </div>
@@ -149,7 +157,7 @@
                     
                     <!-- 第一名 -->
                     <div class="text-center w-1/3 transform translate-y-[-20px]">
-                        <div class="rank-gold w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold shadow-md">
+                        <div class="rank-gold w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold shadow-md pulse">
                             1
                         </div>
                         <p class="font-medium" id="rank-1-name">李四</p>
@@ -191,7 +199,7 @@
 
     <!-- 关注公众号模态框 -->
     <div id="follow-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden bounce-in">
             <div class="bg-primary text-white p-5 text-center">
                 <i class="fa fa-book text-2xl mb-2"></i>
                 <h3 class="text-xl font-bold">文青竞技场！解锁完整题库</h3>
@@ -200,9 +208,13 @@
             
             <div class="p-5">
                 <div class="flex flex-col items-center">
-                    <!-- 公众号二维码（使用GitHub仓库图片链接） -->
+                    <!-- 公众号二维码 -->
                     <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-5 border-4 border-white shadow-md pulse">
-                        <img src="https://github.com/guyor3799/guyor3799.github.io/blob/386df2f9d624572b59fec75ea720a498ec7ff0fa/%E5%BE%AE%E4%BF%A1%E5%85%AC%E5%8F%B7.jpg?raw=true" alt="沧海墨客公众号二维码" class="w-full h-full object-contain">
+                        <!-- 修复图片链接，添加备用图片 -->
+                        <img src="https://guyor3799.github.io/game-b/qrcode/gameB-qrcode.png" 
+                             alt="沧海墨客公众号二维码" 
+                             class="w-full h-full object-contain"
+                             onerror="this.src='https://picsum.photos/400/400?grayscale&blur=2'; this.alt='公众号二维码（请手动替换）';">
                     </div>
                     
                     <h4 class="text-lg font-bold mb-2">沧海墨客</h4>
@@ -211,7 +223,7 @@
                         解锁全部20题，后续高分更能迎好礼，文学造诣等你来证明！
                     </p>
                     
-                    <button id="verify-follow-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                    <button id="verify-follow-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                         <i class="fa fa-check-circle mr-1"></i> 已关注，继续答题
                     </button>
                 </div>
@@ -221,7 +233,7 @@
 
     <!-- 负分分享模态框 -->
     <div id="negative-score-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden bounce-in">
             <div class="bg-red-500 text-white p-5 text-center">
                 <i class="fa fa-exclamation-triangle text-2xl mb-2"></i>
                 <h3 class="text-xl font-bold">分数已不足</h3>
@@ -234,11 +246,11 @@
                         当前分数：<span id="negative-score" class="font-bold text-red-500">-5</span>
                     </p>
                     
-                    <button id="share-friend-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center">
+                    <button id="share-friend-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center">
                         <i class="fa fa-weixin mr-2"></i> 分享给好友
                     </button>
                     
-                    <button id="share-moments-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center">
+                    <button id="share-moments-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center">
                         <i class="fa fa-commenting-o mr-2"></i> 分享到朋友圈
                     </button>
                 </div>
@@ -248,7 +260,7 @@
 
     <!-- 作弊提示模态框 -->
     <div id="cheat-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden bounce-in">
             <div class="bg-orange-500 text-white p-5 text-center">
                 <i class="fa fa-warning text-2xl mb-2"></i>
                 <h3 class="text-xl font-bold">检测到异常操作</h3>
@@ -259,7 +271,7 @@
                     <p id="cheat-message" class="text-gray-700 mb-5">分享未成功，请重新分享</p>
                     <p class="text-red-500 font-bold mb-4">已扣除10分</p>
                     
-                    <button id="confirm-cheat-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                    <button id="confirm-cheat-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                         确认并重新分享
                     </button>
                 </div>
@@ -267,9 +279,9 @@
         </div>
     </div>
 
-    <!-- 提示模态框（增强版） -->
+    <!-- 提示模态框 -->
     <div id="hint-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all bounce-in">
             <div class="bg-blue-500 text-white p-5 text-center">
                 <i class="fa fa-lightbulb-o text-3xl mb-2 text-yellow-200 pulse"></i>
                 <h3 class="text-xl font-bold">答案提示</h3>
@@ -286,7 +298,7 @@
                         剩余提示次数: <span id="hint-remaining" class="font-bold text-blue-500">1</span>
                     </p>
                     
-                    <button id="close-hint-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                    <button id="close-hint-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                         知道了，继续答题
                     </button>
                 </div>
@@ -296,7 +308,7 @@
 
     <!-- 保存成绩模态框 -->
     <div id="save-score-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden bounce-in">
             <div class="bg-primary text-white p-5 text-center">
                 <i class="fa fa-trophy text-2xl mb-2"></i>
                 <h3 class="text-xl font-bold">保存你的成绩</h3>
@@ -312,7 +324,7 @@
                     你的得分: <span id="score-to-save" class="font-bold text-secondary">0</span>
                 </p>
                 
-                <button id="confirm-save-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                <button id="confirm-save-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                     确认保存
                 </button>
             </div>
@@ -558,6 +570,12 @@
         const myRankElement = document.getElementById('my-rank');
         const myScoreElement = document.getElementById('my-score');
         
+        // 初始化
+        function init() {
+            initEventListeners();
+            updateRankingDisplay();
+        }
+        
         // 初始化事件监听器
         function initEventListeners() {
             startBtn.addEventListener('click', startGame);
@@ -624,7 +642,7 @@
             
             optionIndices.forEach(i => {
                 const button = document.createElement('button');
-                button.className = 'w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-purple-50 transition-colors duration-200';
+                button.className = 'w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-purple-50 transition-colors duration-200 transform hover:translate-x-1';
                 button.textContent = shuffledOptions[i];
                 button.dataset.correct = i === question.correct;
                 button.addEventListener('click', () => checkAnswer(button, i === question.correct));
@@ -638,6 +656,7 @@
             const allOptions = optionsElement.querySelectorAll('button');
             allOptions.forEach(btn => {
                 btn.disabled = true;
+                btn.classList.remove('hover:bg-purple-50', 'hover:translate-x-1');
                 if (btn.dataset.correct === 'true') {
                     btn.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
                 }
@@ -682,7 +701,7 @@
         // 显示反馈
         function showFeedback(message, className) {
             feedbackElement.textContent = message;
-            feedbackElement.className = `p-3 rounded-lg mb-6 text-center ${className}`;
+            feedbackElement.className = `p-3 rounded-lg mb-6 text-center ${className} bounce-in`;
             feedbackElement.classList.remove('hidden');
         }
         
@@ -768,13 +787,13 @@
             const currentQuestion = questions[gameState.currentQuestion];
             hintContentElement.textContent = currentQuestion.hint;
             hintRemainingElement.textContent = gameState.maxHints - gameState.hintsUsed - 1;
-            
             hintModal.classList.remove('hidden');
+            
             gameState.hintsUsed++;
             hintCountElement.textContent = gameState.maxHints - gameState.hintsUsed;
         }
         
-        // 关闭提示
+        // 关闭提示模态框
         function closeHintModal() {
             hintModal.classList.add('hidden');
         }
@@ -782,33 +801,37 @@
         // 显示保存成绩模态框
         function showSaveScoreModal() {
             scoreToSaveElement.textContent = gameState.score;
+            usernameInput.value = currentUser.name || '';
             saveScoreModal.classList.remove('hidden');
+            usernameInput.focus();
         }
         
         // 保存成绩
         function saveScore() {
             const username = usernameInput.value.trim() || '匿名用户';
             currentUser.name = username;
-            currentUser.hasSaved = true;
+            currentUser.score = gameState.score;
+            currentUser.timestamp = new Date().getTime();
             
-            // 添加到排行榜
-            rankingData.push({
-                name: username,
-                score: gameState.score,
-                timestamp: new Date().getTime()
+            // 添加到排行榜并排序
+            rankingData.push(currentUser);
+            rankingData.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return b.timestamp - a.timestamp; // 分数相同则新成绩排前面
             });
             
-            // 排序并保留前10名
-            rankingData.sort((a, b) => b.score - a.score || b.timestamp - a.timestamp);
-            if (rankingData.length > 10) {
-                rankingData = rankingData.slice(0, 10);
+            // 只保留前20名
+            if (rankingData.length > 20) {
+                rankingData = rankingData.slice(0, 20);
             }
             
             // 保存到本地存储
             saveRankingData(rankingData);
             
+            currentUser.hasSaved = true;
             saveScoreModal.classList.add('hidden');
-            usernameInput.value = '';
             
             // 显示排行榜
             showRanking();
@@ -816,21 +839,18 @@
         
         // 显示排行榜
         function showRanking() {
-            // 隐藏所有屏幕，显示排行榜
+            updateRankingDisplay();
+            
             startScreen.classList.add('hidden');
             gameScreen.classList.add('hidden');
             endScreen.classList.add('hidden');
             rankingScreen.classList.remove('hidden');
-            
-            // 刷新排行榜数据
-            refreshRankingDisplay();
         }
         
         // 隐藏排行榜
         function hideRanking() {
             rankingScreen.classList.add('hidden');
             
-            // 返回到之前的屏幕
             if (gameState.isGameOver) {
                 endScreen.classList.remove('hidden');
             } else if (gameState.currentQuestion > 0) {
@@ -840,10 +860,10 @@
             }
         }
         
-        // 刷新排行榜显示
-        function refreshRankingDisplay() {
+        // 更新排行榜显示
+        function updateRankingDisplay() {
             // 确保数据已排序
-            rankingData.sort((a, b) => b.score - a.score || b.timestamp - a.timestamp);
+            rankingData.sort((a, b) => b.score - a.score);
             
             // 更新前三名
             if (rankingData.length >= 1) {
@@ -862,11 +882,10 @@
             // 清空其他排名
             otherRanksElement.innerHTML = '';
             
-            // 更新其他排名（从第4名开始）
-            for (let i = 3; i < rankingData.length; i++) {
+            // 更新4名及以后的排名
+            for (let i = 3; i < rankingData.length && i < 10; i++) {
                 const rankItem = document.createElement('div');
-                rankItem.className = 'flex items-center justify-between p-2 border-b border-gray-100 last:border-0';
-                
+                rankItem.className = 'flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg';
                 rankItem.innerHTML = `
                     <div class="flex items-center">
                         <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-center text-xs font-bold mr-3 flex items-center justify-center">${i + 1}</span>
@@ -874,27 +893,24 @@
                     </div>
                     <span class="text-secondary font-bold">${rankingData[i].score}</span>
                 `;
-                
                 otherRanksElement.appendChild(rankItem);
             }
             
             // 更新我的排名
             myScoreElement.textContent = currentUser.score;
             
-            if (currentUser.hasSaved) {
-                // 查找当前用户的排名
-                const myRank = rankingData.findIndex(item => 
-                    item.name === currentUser.name && 
-                    item.score === currentUser.score &&
-                    // 考虑时间戳，避免同名同分数的情况
-                    Math.abs(item.timestamp - new Date().getTime()) < 5000
-                );
-                
-                if (myRank !== -1) {
-                    myRankElement.querySelector('span:first-child').textContent = myRank + 1;
-                } else {
-                    myRankElement.querySelector('span:first-child').textContent = '10+';
-                }
+            const myRank = rankingData.findIndex(user => 
+                user.name === currentUser.name && 
+                user.score === currentUser.score && 
+                user.timestamp === currentUser.timestamp
+            );
+            
+            if (myRank !== -1) {
+                myRankElement.querySelector('span:first-child').textContent = myRank + 1;
+            } else if (currentUser.score > 0) {
+                // 如果未进入排行榜但有分数，显示预估排名
+                const estimatedRank = rankingData.filter(user => user.score > currentUser.score).length + 1;
+                myRankElement.querySelector('span:first-child').textContent = estimatedRank;
             } else {
                 myRankElement.querySelector('span:first-child').textContent = '--';
             }
@@ -902,31 +918,26 @@
         
         // 处理页面可见性变化
         function handleVisibilityChange() {
-            const currentTime = new Date().getTime();
-            
-            // 如果页面从不可见变为可见
-            if (document.visibilityState === 'visible') {
-                // 检查是否在分享过程中作弊
-                if (!negativeScoreModal.classList.contains('hidden')) {
-                    const hiddenDuration = currentTime - lastVisibleTime;
-                    if (hiddenDuration < MIN_SHARE_DURATION) {
-                        gameState.score -= 10;
-                        updateScore();
-                        negativeScoreModal.classList.add('hidden');
-                        showCheatModal("检测到异常操作，可能未完成分享");
-                    }
+            if (document.hidden) {
+                // 页面不可见时记录时间
+                lastVisibleTime = new Date().getTime();
+            } else {
+                // 页面重新可见时检查
+                const currentTime = new Date().getTime();
+                const hiddenDuration = currentTime - lastVisibleTime;
+                
+                // 如果在游戏中且页面不可见时间过长，视为作弊
+                if (!gameState.isGameOver && gameState.currentQuestion > 0 && hiddenDuration > 10000) {
+                    gameState.score -= 15;
+                    updateScore();
+                    showCheatModal("检测到长时间离开页面，已扣除15分");
                 }
+                
+                lastVisibleTime = currentTime;
             }
-            
-            lastVisibleTime = currentTime;
         }
         
-        // 初始化游戏
-        function init() {
-            initEventListeners();
-        }
-        
-        // 启动游戏
+        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
