@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沧海ke | 文学知识问答</title>
+    <title>文学知识问答挑战</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
@@ -14,7 +14,7 @@
                     colors: {
                         primary: '#8B5CF6',
                         secondary: '#EC4899',
-                        admin: '#10B981' // 管理员绿色
+                        neutral: '#1F2937',
                     }
                 }
             }
@@ -22,63 +22,55 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
+            .modal-backdrop {
+                backdrop-filter: blur(3px);
+            }
+            .pulse {
+                animation: pulse 2s infinite;
+            }
             .pulse-soft {
                 animation: pulse-soft 2s infinite;
             }
-            .rank-highlight {
-                background-color: rgba(16, 185, 129, 0.05);
-                border-color: rgba(16, 185, 129, 0.2);
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
             }
-            .card-shadow {
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+            @keyframes pulse-soft {
+                0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
             }
-        }
-        @keyframes pulse-soft {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            .rank-gold {
+                background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            }
+            .rank-silver {
+                background: linear-gradient(135deg, #E0E0E0 0%, #A9A9A9 100%);
+            }
+            .rank-bronze {
+                background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-2xl">
-        <!-- 标题区 -->
-        <div class="text-center mb-8">
-            <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-primary mb-2">文学知识问答</h1>
-            <p class="text-gray-600">挑战你的文学素养，记录你的排名</p>
-        </div>
-
         <!-- 开始界面 -->
-        <div id="start-screen" class="text-center py-6">
-            <div class="relative h-52 mb-8 rounded-xl overflow-hidden shadow-lg">
-                <img src="https://picsum.photos/id/24/800/500" alt="古籍与书法背景" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
-                    <p class="text-white p-4 text-shadow">中华文化 · 经典传承</p>
-                </div>
+        <div id="start-screen" class="text-center py-10">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-primary mb-6">文学知识问答</h1>
+            <p class="text-gray-600 mb-8">挑战你的文学素养，测试对经典文学的了解程度！</p>
+            
+            <div class="relative h-56 mb-10 rounded-xl overflow-hidden shadow-lg">
+                <img src="https://picsum.photos/id/24/800/500" alt="书架上的经典文学书籍" class="w-full h-full object-cover">
             </div>
-
-            <button id="start-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 mb-4">
+            
+            <button id="start-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300">
                 开始挑战 <i class="fa fa-arrow-right ml-2"></i>
             </button>
-            <button id="ranking-btn" class="bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full text-base transition-all duration-300 border border-primary/30 mb-6">
-                查看排行榜 <i class="fa fa-trophy ml-1"></i>
+            <button id="ranking-btn" class="mt-4 bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full transition-all duration-300 border border-primary">
+                <i class="fa fa-trophy mr-1"></i> 查看排行榜
             </button>
-
-            <!-- 管理员登录入口 -->
-            <div class="mt-8">
-                <p id="admin-trigger" class="text-xs text-gray-500 cursor-pointer" onclick="toggleAdminLogin()">
-                    <i class="fa fa-shield mr-1"></i> 管理员入口（点击显示）
-                </p>
-                <div id="admin-login" class="hidden mt-4 bg-white p-4 rounded-xl shadow-md border border-admin/20 card-shadow">
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="admin-pwd">管理员密码</label>
-                        <input type="password" id="admin-pwd" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-admin/50" placeholder="输入管理员密码">
-                    </div>
-                    <button id="admin-login-btn" class="w-full bg-admin hover:bg-admin/90 text-white py-2 rounded-lg transition-colors pulse-soft">
-                        登录查看全用户数据
-                    </button>
-                </div>
-            </div>
+            <p class="mt-4 text-sm text-gray-500">规则：共20题 | 答对+10分 | 答错-5分 | 3题后需关注公众号 | 负分需分享</p>
         </div>
 
         <!-- 游戏界面 -->
@@ -94,19 +86,42 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 card-shadow">
-                <h2 id="question" class="text-xl font-bold mb-5">题目加载中...</h2>
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 id="question" class="text-xl font-bold mb-5"></h2>
                 <div id="options" class="space-y-3">
-                    <!-- 选项动态生成 -->
+                    <!-- 选项将动态生成 -->
+                </div>
+                
+                <!-- 增强版答案提示按钮 -->
+                <div class="mt-5 text-center">
+                    <button id="hint-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-full text-sm transition-all duration-300 flex items-center justify-center mx-auto pulse-soft">
+                        <i class="fa fa-lightbulb-o mr-2 text-yellow-200"></i> 提示 (剩余: <span id="hint-count" class="ml-1 font-bold">2</span>)
+                    </button>
+                    <p class="text-xs text-blue-500 mt-2">点击获取答案线索</p>
                 </div>
             </div>
 
-            <div class="flex justify-between">
-                <button id="hint-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-5 rounded-full text-sm transition-all duration-300">
-                    提示 (剩余: <span id="hint-count">2</span>)
-                </button>
-                <button id="quit-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-5 rounded-full text-sm transition-all duration-300">
-                    退出
+            <div id="feedback" class="hidden p-3 rounded-lg mb-6 text-center"></div>
+        </div>
+
+        <!-- 结束界面 -->
+        <div id="end-screen" class="hidden text-center py-6">
+            <h2 class="text-2xl font-bold text-primary mb-3">挑战完成！</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <p class="text-gray-600 mb-1">你的最终得分</p>
+                <p id="final-score" class="text-4xl font-bold text-secondary mb-3">0</p>
+                
+                <div class="mb-4">
+                    <button id="save-score-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 mr-2">
+                        <i class="fa fa-save mr-1"></i> 保存成绩
+                    </button>
+                    <button id="ranking-end-btn" class="bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full transition-all duration-300 border border-primary">
+                        <i class="fa fa-trophy mr-1"></i> 查看排名
+                    </button>
+                </div>
+                
+                <button id="restart-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-all duration-300">
+                    再次挑战 <i class="fa fa-refresh ml-1"></i>
                 </button>
             </div>
         </div>
@@ -114,440 +129,981 @@
         <!-- 排行榜界面 -->
         <div id="ranking-screen" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-primary">
-                    <i class="fa fa-trophy mr-2 text-secondary"></i>排行榜
-                </h2>
-                <button id="back-btn" class="bg-white hover:bg-gray-50 text-gray-700 font-medium py-1.5 px-4 rounded-lg border border-gray-300 transition-colors">
-                    返回
+                <button id="back-from-ranking-btn" class="text-primary hover:text-primary/80 font-medium transition-colors">
+                    <i class="fa fa-arrow-left mr-1"></i> 返回
                 </button>
+                <h2 class="text-2xl font-bold text-primary">分数排行榜</h2>
+                <div class="w-8"></div> <!-- 占位元素，保持居中 -->
             </div>
 
-            <!-- 管理员标识 -->
-            <div id="admin-badge" class="hidden mb-4 bg-admin/10 text-admin text-sm font-medium py-1 px-3 rounded-full inline-block">
-                <i class="fa fa-user-secret mr-1"></i> 管理员视图（显示所有用户）
-            </div>
-
-            <!-- 前三名特殊展示 -->
-            <div class="grid grid-cols-3 gap-4 mb-8">
-                <!-- 第二名 -->
-                <div class="bg-white rounded-xl shadow-md p-4 text-center transform scale-95 card-shadow">
-                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-500">2</div>
-                    <p id="rank-2-name" class="font-medium mb-1">暂无用户</p>
-                    <p id="rank-2-score" class="text-lg font-bold text-secondary">0</p>
-                </div>
-                <!-- 第一名 -->
-                <div class="bg-white rounded-xl shadow-lg p-5 text-center transform scale-105 card-shadow">
-                    <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-yellow-400 flex items-center justify-center text-2xl font-bold text-white">1</div>
-                    <p id="rank-1-name" class="font-medium mb-1">暂无用户</p>
-                    <p id="rank-1-score" class="text-xl font-bold text-secondary">0</p>
-                </div>
-                <!-- 第三名 -->
-                <div class="bg-white rounded-xl shadow-md p-4 text-center transform scale-90 card-shadow">
-                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-700 flex items-center justify-center text-2xl font-bold text-white">3</div>
-                    <p id="rank-3-name" class="font-medium mb-1">暂无用户</p>
-                    <p id="rank-3-score" class="text-lg font-bold text-secondary">0</p>
-                </div>
-            </div>
-
-            <!-- 排行榜列表 -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden card-shadow">
-                <div class="grid grid-cols-4 bg-gray-50 py-2 px-4 font-medium text-gray-600 border-b border-gray-200">
-                    <div>排名</div>
-                    <div class="col-span-2">用户</div>
-                    <div>分数</div>
-                </div>
-                <div id="ranking-list" class="max-h-[400px] overflow-y-auto">
-                    <!-- 排名项动态生成 -->
-                    <div class="grid grid-cols-4 py-3 px-4 border-b border-gray-100 text-center">
-                        <div class="text-gray-500">--</div>
-                        <div class="col-span-2 text-gray-500">暂无排名数据</div>
-                        <div class="text-gray-500">--</div>
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <!-- 前三名展示 -->
+                <div class="flex justify-center items-end mb-10">
+                    <!-- 第二名 -->
+                    <div class="text-center w-1/3">
+                        <div class="rank-silver w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold text-sm shadow-md">
+                            2
+                        </div>
+                        <p class="font-medium" id="rank-2-name">张三</p>
+                        <p class="text-secondary font-bold" id="rank-2-score">180</p>
+                    </div>
+                    
+                    <!-- 第一名 -->
+                    <div class="text-center w-1/3 transform translate-y-[-20px]">
+                        <div class="rank-gold w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold shadow-md">
+                            1
+                        </div>
+                        <p class="font-medium" id="rank-1-name">李四</p>
+                        <p class="text-secondary font-bold" id="rank-1-score">190</p>
+                    </div>
+                    
+                    <!-- 第三名 -->
+                    <div class="text-center w-1/3">
+                        <div class="rank-bronze w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold text-sm shadow-md">
+                            3
+                        </div>
+                        <p class="font-medium" id="rank-3-name">王五</p>
+                        <p class="text-secondary font-bold" id="rank-3-score">170</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- 管理员操作区 -->
-            <div id="admin-actions" class="hidden mt-6 text-center">
-                <button id="export-ranking" class="bg-admin hover:bg-admin/90 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    <i class="fa fa-download mr-1"></i> 导出全用户排名数据
-                </button>
+                
+                <!-- 其他排名 -->
+                <div class="space-y-3" id="other-ranks">
+                    <!-- 排名将动态生成 -->
+                </div>
+                
+                <!-- 我的排名 -->
+                <div class="mt-6 pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between bg-purple-50 p-3 rounded-lg" id="my-rank">
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 rounded-full bg-primary text-white text-center text-xs font-bold mr-3 flex items-center justify-center">--</span>
+                            <span class="font-medium">我</span>
+                        </div>
+                        <span class="text-secondary font-bold" id="my-score">0</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-500 text-center">
+                    <p>排行榜数据存储在本地，仅在当前设备可见</p>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- 结束界面 -->
-        <div id="end-screen" class="hidden text-center py-6">
-            <div class="bg-white rounded-xl shadow-lg p-8 mb-6 card-shadow">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                    <i class="fa fa-trophy text-2xl text-primary"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-primary mb-4">挑战完成！</h2>
-                <p class="text-lg mb-2">你的最终得分：<span id="final-score" class="font-bold text-secondary">0</span></p>
-                <p id="final-rank" class="text-gray-600 mb-6">你的排名：未上榜</p>
-                
-                <div class="flex flex-col sm:flex-row justify-center gap-3">
-                    <button id="save-score-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-colors">
-                        保存成绩到排行榜
-                    </button>
-                    <button id="restart-btn" class="bg-white hover:bg-gray-50 text-primary font-bold py-2 px-6 rounded-full border border-primary/30 transition-colors">
-                        重新挑战
+    <!-- 关注公众号模态框 -->
+    <div id="follow-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="bg-primary text-white p-5 text-center">
+                <i class="fa fa-lock text-2xl mb-2"></i>
+                <h3 class="text-xl font-bold">继续答题需关注公众号</h3>
+                <p class="opacity-90 text-sm mt-1">完成关注即可解锁全部题目</p>
+            </div>
+            
+            <div class="p-5">
+                <div class="flex flex-col items-center">
+                    <!-- 公众号二维码 -->
+                    <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-5 border-4 border-white shadow-md pulse">
+                        <i class="fa fa-qrcode text-6xl text-gray-400"></i>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold mb-2">沧海墨客</h4>
+                    <p class="text-gray-600 text-center text-sm mb-4">
+                        长按二维码关注公众号<br>
+                        关注后验证即可继续答题
+                    </p>
+                    
+                    <button id="verify-follow-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                        <i class="fa fa-check-circle mr-1"></i> 已关注，验证并继续
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // 游戏核心数据
-        const RANKING_KEY = 'literature_quiz_ranking';
-        const ADMIN_PASSWORD = 'admin123456'; // 管理员密码，实际使用时应修改
-        let currentQuestion = 0;
-        let score = 0;
-        let hintsUsed = 0;
-        let isAdmin = false;
-        let userScores = JSON.parse(localStorage.getItem(RANKING_KEY)) || [];
-        let currentUserName = '';
+    <!-- 负分分享模态框 -->
+    <div id="negative-score-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="bg-red-500 text-white p-5 text-center">
+                <i class="fa fa-exclamation-triangle text-2xl mb-2"></i>
+                <h3 class="text-xl font-bold">分数已不足</h3>
+                <p class="opacity-90 text-sm mt-1">分享好友或朋友圈即可继续答题</p>
+            </div>
+            
+            <div class="p-5">
+                <div class="flex flex-col items-center space-y-3">
+                    <p class="text-gray-600 text-center mb-2">
+                        当前分数：<span id="negative-score" class="font-bold text-red-500">-5</span>
+                    </p>
+                    
+                    <button id="share-friend-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center">
+                        <i class="fa fa-weixin mr-2"></i> 分享给好友
+                    </button>
+                    
+                    <button id="share-moments-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center">
+                        <i class="fa fa-commenting-o mr-2"></i> 分享到朋友圈
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 题库数据
+    <!-- 作弊提示模态框 -->
+    <div id="cheat-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="bg-orange-500 text-white p-5 text-center">
+                <i class="fa fa-warning text-2xl mb-2"></i>
+                <h3 class="text-xl font-bold">检测到异常操作</h3>
+            </div>
+            
+            <div class="p-5">
+                <div class="flex flex-col items-center text-center">
+                    <p id="cheat-message" class="text-gray-700 mb-5">分享未成功，请重新分享</p>
+                    <p class="text-red-500 font-bold mb-4">已扣除10分</p>
+                    
+                    <button id="confirm-cheat-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                        确认并重新分享
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示模态框（增强版） -->
+    <div id="hint-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all">
+            <div class="bg-blue-500 text-white p-5 text-center">
+                <i class="fa fa-lightbulb-o text-3xl mb-2 text-yellow-200 pulse"></i>
+                <h3 class="text-xl font-bold">答案提示</h3>
+                <p class="text-sm opacity-90 mt-1">这是一个重要线索哦！</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex flex-col items-center text-center">
+                    <div class="bg-blue-50 rounded-xl p-4 mb-5 w-full">
+                        <p id="hint-content" class="text-gray-700 text-lg">这是一个提示信息</p>
+                    </div>
+                    
+                    <p class="text-sm text-gray-500 mb-5">
+                        剩余提示次数: <span id="hint-remaining" class="font-bold text-blue-500">1</span>
+                    </p>
+                    
+                    <button id="close-hint-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                        知道了，继续答题
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存成绩模态框 -->
+    <div id="save-score-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="bg-primary text-white p-5 text-center">
+                <i class="fa fa-trophy text-2xl mb-2"></i>
+                <h3 class="text-xl font-bold">保存你的成绩</h3>
+            </div>
+            
+            <div class="p-5">
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-medium mb-2">你的昵称</label>
+                    <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入你的昵称">
+                </div>
+                
+                <p class="text-center text-gray-600 mb-4">
+                    你的得分: <span id="score-to-save" class="font-bold text-secondary">0</span>
+                </p>
+                
+                <button id="confirm-save-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                    确认保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置参数
+        const公众号APPID = "wx1234567890abcdef";
+        const REQUIRED_FOLLOW_AFTER = 2; // 第3题后强制关注（索引从0开始）
+        let lastVisibleTime = new Date().getTime(); // 记录最后可见时间
+        let shareStartTime = 0; // 分享开始时间
+        const MIN_SHARE_DURATION = 3000; // 最小分享时长(毫秒)
+        const RANKING_STORAGE_KEY = "literature_quiz_ranking"; // 本地存储键名
+        
+        // 从本地存储加载排行榜数据
+        function loadRankingData() {
+            const savedData = localStorage.getItem(RANKING_STORAGE_KEY);
+            if (savedData) {
+                try {
+                    return JSON.parse(savedData);
+                } catch (e) {
+                    console.error("加载排行榜数据失败:", e);
+                    return [];
+                }
+            }
+            // 如果没有数据，返回默认示例数据
+            return [
+                { name: "文学大师", score: 200, timestamp: new Date().getTime() - 86400000 * 2 },
+                { name: "书香门第", score: 180, timestamp: new Date().getTime() - 86400000 },
+                { name: "诗词达人", score: 165, timestamp: new Date().getTime() - 43200000 },
+                { name: "文学爱好者", score: 150, timestamp: new Date().getTime() - 36000000 },
+                { name: "初学者", score: 120, timestamp: new Date().getTime() - 28800000 }
+            ];
+        }
+        
+        // 保存排行榜数据到本地存储
+        function saveRankingData(data) {
+            try {
+                localStorage.setItem(RANKING_STORAGE_KEY, JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error("保存排行榜数据失败:", e);
+                return false;
+            }
+        }
+        
+        // 排行榜数据（从本地存储加载）
+        let rankingData = loadRankingData();
+        
+        // 当前用户数据
+        let currentUser = {
+            name: "",
+            score: 0,
+            hasSaved: false
+        };
+        
+        // 题库
         const questions = [
             {
                 question: "《红楼梦》的作者是谁？",
-                options: ["罗贯中", "曹雪芹", "吴承恩", "施耐庵"],
-                correct: 1
+                options: ["吴承恩", "曹雪芹", "罗贯中", "施耐庵"],
+                correct: 1,
+                hint: "这位作者生活在清代，家族曾显赫一时，作品被誉为中国古典小说巅峰之作"
             },
             {
-                question: "下列哪个不是唐代诗人？",
-                options: ["李白", "杜甫", "苏轼", "王维"],
-                correct: 2
+                question: "下列哪部作品不属于莎士比亚的四大悲剧？",
+                options: ["哈姆雷特", "罗密欧与朱丽叶", "麦克白", "李尔王"],
+                correct: 1,
+                hint: "这是一部爱情悲剧，但不属于四大悲剧，讲述了两个敌对家族的年轻人的爱情故事"
             },
             {
-                question: "\"床前明月光\"的下一句是？",
-                options: ["疑是地上霜", "举头望明月", "低头思故乡", "明月照我还"],
-                correct: 0
+                question: "《三国演义》中，“过五关斩六将”的是谁？",
+                options: ["张飞", "关羽", "赵云", "马超"],
+                correct: 1,
+                hint: "他是刘备的二弟，以忠义闻名，手持青龙偃月刀，后被尊为“武圣”"
             },
             {
-                question: "《三国演义》中\"桃园三结义\"的三位人物不包括？",
-                options: ["刘备", "关羽", "张飞", "赵云"],
-                correct: 3
+                question: "鲁迅的第一篇白话小说是什么？",
+                options: ["《阿Q正传》", "《狂人日记》", "《药》", "《祝福》"],
+                correct: 1,
+                hint: "这篇小说发表于1918年，描写了一个“狂人”的视角，揭露了封建礼教的吃人本质"
             },
             {
-                question: "\"但愿人长久，千里共婵娟\"出自哪位词人？",
-                options: ["李清照", "苏轼", "辛弃疾", "柳永"],
-                correct: 1
+                question: "《西游记》中，孙悟空的第一个师傅是谁？",
+                options: ["唐僧", "如来佛祖", "菩提祖师", "观音菩萨"],
+                correct: 2,
+                hint: "这位师傅住在灵台方寸山，斜月三星洞，教会了孙悟空七十二变和筋斗云"
+            },
+            {
+                question: "下列哪位不是唐宋八大家之一？",
+                options: ["韩愈", "柳宗元", "苏轼", "李白"],
+                correct: 3,
+                hint: "这位诗人被称为“诗仙”，主要活跃于盛唐时期，擅长写七言绝句和乐府诗"
+            },
+            {
+                question: "《水浒传》中共有多少位好汉？",
+                options: ["108", "105", "100", "120"],
+                correct: 0,
+                hint: "这个数字在传统文化中代表星宿的数量，分为三十六天罡和七十二地煞"
+            },
+            {
+                question: "《诗经》分为风、雅、颂三类，其中记载各地民歌的是？",
+                options: ["风", "雅", "颂", "以上都不是"],
+                correct: 0,
+                hint: "这个字有“民谣、民歌”的含义，共收录了160篇来自各地的歌谣"
+            },
+            {
+                question: "《简·爱》的作者是谁？",
+                options: ["夏洛蒂·勃朗特", "艾米莉·勃朗特", "简·奥斯汀", "狄更斯"],
+                correct: 0,
+                hint: "她是勃朗特三姐妹中的大姐，这部作品是她的代表作，讲述了一个女性追求独立和平等的故事"
+            },
+            {
+                question: "“床前明月光，疑是地上霜”出自哪位诗人的哪首诗？",
+                options: ["杜甫《月夜忆舍弟》", "李白《静夜思》", "王维《山居秋暝》", "白居易《赋得古原草送别》"],
+                correct: 1,
+                hint: "这位诗人被称为“诗仙”，这首诗表达了思乡之情，是流传最广的唐诗之一"
+            },
+            {
+                question: "《巴黎圣母院》的作者是？",
+                options: ["雨果", "巴尔扎克", "莫泊桑", "福楼拜"],
+                correct: 0,
+                hint: "这位法国作家还写过《悲惨世界》，是19世纪浪漫主义文学的代表人物"
+            },
+            {
+                question: "下列哪部作品是莫言的代表作？",
+                options: ["《活着》", "《红高粱家族》", "《平凡的世界》", "《白鹿原》"],
+                correct: 1,
+                hint: "这部作品被改编成了同名电影，由张艺谋执导，讲述了抗日战争时期的家族故事"
+            },
+            {
+                question: "“人生自古谁无死，留取丹心照汗青”是谁的诗句？",
+                options: ["岳飞", "文天祥", "辛弃疾", "陆游"],
+                correct: 1,
+                hint: "这位诗人是南宋末年的抗元英雄，写下了《过零丁洋》，后被元军俘虏杀害"
+            },
+            {
+                question: "《百年孤独》的作者加西亚·马尔克斯来自哪个国家？",
+                options: ["西班牙", "巴西", "哥伦比亚", "墨西哥"],
+                correct: 2,
+                hint: "这个国家以咖啡和魔幻现实主义文学闻名，首都是波哥大"
+            },
+            {
+                question: "《史记》的作者是？",
+                options: ["司马光", "司马迁", "班固", "刘向"],
+                correct: 1,
+                hint: "这位史学家因李陵之祸遭受宫刑，仍坚持完成这部纪传体通史，被鲁迅称为“史家之绝唱”"
+            },
+            {
+                question: "“大江东去，浪淘尽”出自苏轼的哪首词？",
+                options: ["《水调歌头》", "《念奴娇·赤壁怀古》", "《江城子》", "《蝶恋花》"],
+                correct: 1,
+                hint: "这首词与三国时期的赤壁之战有关，其中“乱石穿空，惊涛拍岸”是名句"
+            },
+            {
+                question: "《战争与和平》的作者是？",
+                options: ["托尔斯泰", "陀思妥耶夫斯基", "契诃夫", "果戈理"],
+                correct: 0,
+                hint: "这位俄国作家还写过《安娜·卡列尼娜》和《复活》，是现实主义文学的代表人物"
+            },
+            {
+                question: "下列哪部作品不是金庸的武侠小说？",
+                options: ["《射雕英雄传》", "《笑傲江湖》", "《白发魔女传》", "《天龙八部》"],
+                correct: 2,
+                hint: "这部作品的作者是梁羽生，讲述了练霓裳与卓一航的爱情故事"
+            },
+            {
+                question: "“横眉冷对千夫指，俯首甘为孺子牛”是谁的诗句？",
+                options: ["郭沫若", "鲁迅", "茅盾", "巴金"],
+                correct: 1,
+                hint: "这位作家原名周树人，是中国现代文学的奠基人之一，作品包括《呐喊》《彷徨》等"
+            },
+            {
+                question: "《哈利·波特》系列小说的作者是？",
+                options: ["J.K.罗琳", "托尔金", "刘易斯", "菲利普·普尔曼"],
+                correct: 0,
+                hint: "这位英国女作家曾靠救济金生活，在咖啡馆里完成了第一部作品，2007年完成整个系列"
             }
-            // 可继续添加更多题目
         ];
+
+        // 游戏状态变量
+        let currentQuestion = 0;
+        let score = 0;
+        let hasFollowed = false;
+        let isProcessing = false;
+        let usedQuestionIndexes = []; // 已使用题目索引
+        let hasShared = false; // 是否已完成分享
+        let hintRemaining = 2; // 剩余提示次数
+        let currentQuestionData = null; // 当前题目数据
 
         // DOM元素
         const startScreen = document.getElementById('start-screen');
         const gameScreen = document.getElementById('game-screen');
-        const rankingScreen = document.getElementById('ranking-screen');
         const endScreen = document.getElementById('end-screen');
+        const rankingScreen = document.getElementById('ranking-screen');
+        const followModal = document.getElementById('follow-modal');
+        const negativeScoreModal = document.getElementById('negative-score-modal');
+        const cheatModal = document.getElementById('cheat-modal');
+        const hintModal = document.getElementById('hint-modal');
+        const saveScoreModal = document.getElementById('save-score-modal');
+        const cheatMessage = document.getElementById('cheat-message');
+        const hintContent = document.getElementById('hint-content');
+        const hintRemainingEl = document.getElementById('hint-remaining');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const rankingBtn = document.getElementById('ranking-btn');
+        const rankingEndBtn = document.getElementById('ranking-end-btn');
+        const backFromRankingBtn = document.getElementById('back-from-ranking-btn');
+        const verifyFollowBtn = document.getElementById('verify-follow-btn');
+        const confirmCheatBtn = document.getElementById('confirm-cheat-btn');
+        const shareFriendBtn = document.getElementById('share-friend-btn');
+        const shareMomentsBtn = document.getElementById('share-moments-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const closeHintBtn = document.getElementById('close-hint-btn');
+        const hintCountEl = document.getElementById('hint-count');
+        const saveScoreBtn = document.getElementById('save-score-btn');
+        const confirmSaveBtn = document.getElementById('confirm-save-btn');
+        const usernameInput = document.getElementById('username');
+        const scoreToSaveEl = document.getElementById('score-to-save');
+        const negativeScoreEl = document.getElementById('negative-score');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const questionCountEl = document.getElementById('question-count');
+        const scoreEl = document.getElementById('score');
+        const feedbackEl = document.getElementById('feedback');
+        const finalScoreEl = document.getElementById('final-score');
+        const myRankEl = document.getElementById('my-rank');
+        const myScoreEl = document.getElementById('my-score');
+        const otherRanksEl = document.getElementById('other-ranks');
 
-        // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 绑定按钮事件
-            document.getElementById('start-btn').addEventListener('click', startGame);
-            document.getElementById('ranking-btn').addEventListener('click', showRanking);
-            document.getElementById('back-btn').addEventListener('click', goBack);
-            document.getElementById('quit-btn').addEventListener('click', quitGame);
-            document.getElementById('hint-btn').addEventListener('click', useHint);
-            document.getElementById('save-score-btn').addEventListener('click', saveScore);
-            document.getElementById('restart-btn').addEventListener('click', restartGame);
-            document.getElementById('admin-login-btn').addEventListener('click', adminLogin);
-            document.getElementById('export-ranking').addEventListener('click', exportRankingData);
-
-            // 初始化排行榜
-            updateRankingDisplay();
-        });
-
-        // 管理员登录功能
-        function adminLogin() {
-            const inputPwd = document.getElementById('admin-pwd').value;
-            if (inputPwd === ADMIN_PASSWORD) {
-                isAdmin = true;
-                document.getElementById('admin-login').classList.add('hidden');
-                alert('管理员登录成功！将显示所有用户排名数据');
-                showRanking();
-            } else {
-                alert('管理员密码错误，请重新输入');
-            }
-        }
-
-        // 切换管理员登录表单显示
-        function toggleAdminLogin() {
-            const adminLoginForm = document.getElementById('admin-login');
-            adminLoginForm.classList.toggle('hidden');
-        }
-
-        // 开始游戏
-        function startGame() {
-            currentQuestion = 0;
-            score = 0;
-            hintsUsed = 0;
-            document.getElementById('score').textContent = '0';
-            document.getElementById('hint-count').textContent = (2 - hintsUsed);
-            loadQuestion(currentQuestion);
+        // 初始化微信SDK
+        function initWechatSDK() {
+            if (!isWechatEnv()) return;
             
-            startScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-        }
-
-        // 加载题目
-        function loadQuestion(index) {
-            if (index >= questions.length) {
-                endGame();
-                return;
-            }
+            wx.config({
+                debug: false,
+                appId: 公众号APPID,
+                timestamp: new Date().getTime(),
+                nonceStr: Math.random().toString(36).substr(2, 15),
+                signature: '后端生成的签名',
+                jsApiList: ['checkIsFollowAccount', 'updateAppMessageShareData', 'updateTimelineShareData']
+            });
             
-            const question = questions[index];
-            document.getElementById('question').textContent = question.question;
-            document.getElementById('question-count').textContent = `${index + 1}/${questions.length}`;
-            
-            const optionsContainer = document.getElementById('options');
-            optionsContainer.innerHTML = '';
-            
-            question.options.forEach((option, i) => {
-                const optionBtn = document.createElement('button');
-                optionBtn.className = 'w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors';
-                optionBtn.innerHTML = `<span class="inline-block w-6 h-6 rounded-full bg-gray-200 text-center mr-2">${String.fromCharCode(65 + i)}</span>${option}`;
-                optionBtn.addEventListener('click', () => checkAnswer(i, question.correct));
-                optionsContainer.appendChild(optionBtn);
+            wx.ready(() => {
+                console.log('微信SDK初始化完成');
+                setupShareConfig();
             });
         }
 
-        // 检查答案
-        function checkAnswer(selected, correct) {
-            if (selected === correct) {
-                score += 10;
-                showFeedback(true);
-            } else {
-                score = Math.max(0, score - 5);
-                showFeedback(false);
+        // 检查是否在微信环境
+        function isWechatEnv() {
+            return /MicroMessenger/i.test(navigator.userAgent);
+        }
+
+        // 检查关注状态
+        function checkFollowStatus() {
+            if (!isWechatEnv()) {
+                return Promise.resolve(true); // 非微信环境默认已关注
             }
             
-            document.getElementById('score').textContent = score;
-            currentQuestion++;
-            setTimeout(() => loadQuestion(currentQuestion), 1000);
-        }
-
-        // 显示答案反馈
-        function showFeedback(isCorrect) {
-            const feedback = document.createElement('div');
-            feedback.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-8 py-4 rounded-lg text-white font-bold text-xl z-50`;
-            feedback.style.backgroundColor = isCorrect ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)';
-            feedback.textContent = isCorrect ? '正确！+10分' : '错误！-5分';
-            document.body.appendChild(feedback);
-            
-            setTimeout(() => {
-                feedback.remove();
-            }, 800);
-        }
-
-        // 使用提示
-        function useHint() {
-            if (hintsUsed >= 2) return;
-            
-            hintsUsed++;
-            document.getElementById('hint-count').textContent = (2 - hintsUsed);
-            
-            const options = document.querySelectorAll('#options button');
-            const correctIndex = questions[currentQuestion].correct;
-            
-            // 排除正确答案，随机隐藏一个错误选项
-            let wrongOptions = [];
-            options.forEach((opt, i) => {
-                if (i !== correctIndex) wrongOptions.push(opt);
+            return new Promise((resolve) => {
+                wx.checkIsFollowAccount({
+                    accountType: 1,
+                    success: function(res) {
+                        hasFollowed = res.result === 1;
+                        resolve(hasFollowed);
+                    },
+                    fail: function(err) {
+                        console.error('关注状态检测失败:', err);
+                        resolve(false);
+                    }
+                });
             });
-            
-            const randomWrong = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
-            randomWrong.style.opacity = '0.3';
-            randomWrong.disabled = true;
         }
 
-        // 结束游戏
-        function endGame() {
-            gameScreen.classList.add('hidden');
-            endScreen.classList.remove('hidden');
-            document.getElementById('final-score').textContent = score;
+        // 设置分享配置
+        function setupShareConfig() {
+            const shareData = {
+                title: "文学知识问答挑战",
+                desc: "我正在挑战文学知识问答，快来试试！",
+                link: window.location.href,
+                imgUrl: "https://picsum.photos/id/24/200/200"
+            };
             
-            // 计算排名
-            const sortedScores = [...userScores].sort((a, b) => b.score - a.score);
-            let userRank = sortedScores.findIndex(s => s.name === currentUserName && s.score === score) + 1;
-            
-            if (!userRank) {
-                // 新用户预估排名
-                userRank = sortedScores.filter(s => s.score > score).length + 1;
-            }
-            
-            document.getElementById('final-rank').textContent = `预估排名：第${userRank}名`;
-        }
-
-        // 保存分数
-        function saveScore() {
-            // 获取微信昵称（实际环境中可通过微信JS-SDK获取）
-            currentUserName = prompt('请输入您的昵称：') || `用户${Date.now().toString().slice(-4)}`;
-            
-            userScores.push({
-                name: currentUserName,
-                score: score,
-                date: new Date().toLocaleString()
-            });
-            
-            // 去重（保留最高分）
-            const uniqueUsers = {};
-            userScores.forEach(user => {
-                if (!uniqueUsers[user.name] || user.score > uniqueUsers[user.name].score) {
-                    uniqueUsers[user.name] = user;
+            // 分享给好友
+            wx.updateAppMessageShareData({
+                ...shareData,
+                success: function() {
+                    checkShareValidity();
                 }
             });
             
-            userScores = Object.values(uniqueUsers);
-            localStorage.setItem(RANKING_KEY, JSON.stringify(userScores));
+            // 分享到朋友圈
+            wx.updateTimelineShareData({
+                ...shareData,
+                success: function() {
+                    checkShareValidity();
+                }
+            });
+        }
+
+        // 检查分享有效性（防作弊）
+        function checkShareValidity() {
+            const shareDuration = new Date().getTime() - shareStartTime;
             
-            alert('成绩已保存到排行榜！');
-            showRanking();
+            // 检测分享是否有效（时长过短视为作弊）
+            if (shareDuration < MIN_SHARE_DURATION) {
+                // 分享作弊处理
+                score -= 10; // 扣10分
+                updateScore();
+                showCheatModal("分享时间过短，疑似作弊行为");
+                return;
+            }
+            
+            // 有效分享 - 仅本次有效，下次答错仍需分享
+            hasShared = true;
+            hideNegativeScoreModal();
+            loadNextQuestion();
+        }
+
+        // 显示作弊提示模态框
+        function showCheatModal(message) {
+            cheatMessage.textContent = message;
+            cheatModal.classList.remove('hidden');
+        }
+
+        // 隐藏作弊提示模态框
+        function hideCheatModal() {
+            cheatModal.classList.add('hidden');
+        }
+
+        // 显示提示模态框（增强版）
+        function showHintModal() {
+            if (hintRemaining <= 0) return;
+            
+            hintContent.textContent = currentQuestionData.hint;
+            hintRemainingEl.textContent = hintRemaining - 1;
+            hintModal.classList.remove('hidden');
+            
+            // 使用一次提示
+            hintRemaining--;
+            hintCountEl.textContent = hintRemaining;
+            
+            // 如果没有提示次数了，禁用按钮
+            if (hintRemaining <= 0) {
+                hintBtn.disabled = true;
+                hintBtn.classList.remove('pulse-soft', 'hover:bg-blue-600');
+                hintBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+            }
+        }
+
+        // 隐藏提示模态框
+        function hideHintModal() {
+            hintModal.classList.add('hidden');
+        }
+
+        // 获取随机题目索引（不重复）
+        function getRandomQuestionIndex() {
+            if (usedQuestionIndexes.length >= questions.length) {
+                usedQuestionIndexes = []; // 重置，防止无题目可用
+            }
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * questions.length);
+            } while (usedQuestionIndexes.includes(randomIndex));
+            
+            usedQuestionIndexes.push(randomIndex);
+            return randomIndex;
+        }
+
+        // 初始化游戏
+        function initGame() {
+            currentQuestion = 0;
+            score = 0;
+            usedQuestionIndexes = [];
+            hasShared = false;
+            hintRemaining = 2; // 重置提示次数
+            hintCountEl.textContent = hintRemaining;
+            hintBtn.disabled = false;
+            hintBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+            hintBtn.classList.add('pulse-soft', 'hover:bg-blue-600');
+            currentUser.hasSaved = false;
+            updateScore();
+            loadQuestion();
+        }
+
+        // 加载题目
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                endGame();
+                return;
+            }
+
+            const randomIndex = getRandomQuestionIndex();
+            currentQuestionData = questions[randomIndex];
+            
+            questionEl.textContent = currentQuestionData.question;
+            optionsEl.innerHTML = '';
+            feedbackEl.classList.add('hidden');
+
+            questionCountEl.textContent = `${currentQuestion + 1}/${questions.length}`;
+
+            currentQuestionData.options.forEach((option, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-purple-50 transition-colors';
+                btn.innerHTML = `<span class="inline-block w-5 h-5 rounded-full border border-gray-300 mr-2 text-center text-xs leading-5">${String.fromCharCode(65 + i)}</span>${option}`;
+                btn.onclick = () => handleAnswerSelection(i, currentQuestionData.correct);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        // 处理答案选择
+        function handleAnswerSelection(selectedIndex, correctIndex) {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            const options = optionsEl.querySelectorAll('button');
+            
+            // 标记答案
+            options.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-purple-50');
+                
+                if (i === selectedIndex) {
+                    if (i === correctIndex) {
+                        btn.classList.add('bg-green-50', 'border-green-300');
+                        score += 10; // 答对加10分
+                        showFeedback('正确！', 'green');
+                    } else {
+                        btn.classList.add('bg-red-50', 'border-red-300');
+                        options[correctIndex].classList.add('bg-green-50', 'border-green-300');
+                        score -= 5; // 答错扣5分
+                        showFeedback(`错误，正确答案是: ${String.fromCharCode(65 + correctIndex)}`, 'red');
+                        // 答错后重置分享状态，下次负分需要重新分享
+                        hasShared = false;
+                    }
+                }
+            });
+
+            updateScore();
+            
+            // 延迟处理下一步
+            setTimeout(() => {
+                // 核心逻辑：先检查是否需要关注公众号（第3题后）
+                if (currentQuestion === REQUIRED_FOLLOW_AFTER && !hasFollowed) {
+                    showFollowModal();
+                }
+                // 再检查是否负分且未分享
+                else if (score < 0 && !hasShared) {
+                    showNegativeScoreModal();
+                }
+                // 正常加载下一题
+                else {
+                    loadNextQuestion();
+                }
+                isProcessing = false;
+            }, 1500);
+        }
+
+        // 显示反馈
+        function showFeedback(text, color) {
+            feedbackEl.textContent = text;
+            feedbackEl.className = 'p-3 rounded-lg mb-6 text-center';
+            
+            if (color === 'green') {
+                feedbackEl.classList.add('bg-green-50', 'text-green-700');
+            } else {
+                feedbackEl.classList.add('bg-red-50', 'text-red-700');
+            }
+            
+            feedbackEl.classList.remove('hidden');
+        }
+
+        // 更新分数显示
+        function updateScore() {
+            scoreEl.textContent = score;
+            negativeScoreEl.textContent = score;
+            finalScoreEl.textContent = score;
+            currentUser.score = score;
+            scoreToSaveEl.textContent = score;
+        }
+
+        // 加载下一题
+        function loadNextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        // 游戏结束
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+            currentUser.score = score;
+        }
+
+        // 显示关注模态框
+        function showFollowModal() {
+            followModal.classList.remove('hidden');
+            negativeScoreEl.textContent = score;
+        }
+
+        // 隐藏关注模态框
+        function hideFollowModal() {
+            followModal.classList.add('hidden');
+            loadNextQuestion();
+        }
+
+        // 显示负分分享模态框
+        function showNegativeScoreModal() {
+            negativeScoreModal.classList.remove('hidden');
+            negativeScoreEl.textContent = score;
+            // 记录分享开始时间（用于防作弊检测）
+            shareStartTime = new Date().getTime();
+        }
+
+        // 隐藏负分分享模态框
+        function hideNegativeScoreModal() {
+            negativeScoreModal.classList.add('hidden');
         }
 
         // 显示排行榜
         function showRanking() {
-            endScreen.classList.add('hidden');
             startScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
             rankingScreen.classList.remove('hidden');
             
-            updateRankingDisplay();
+            // 更新排行榜数据
+            updateRankingData();
         }
 
-        // 更新排行榜显示
-        function updateRankingDisplay() {
-            // 管理员视图控制
-            if (isAdmin) {
-                document.getElementById('admin-badge').classList.remove('hidden');
-                document.getElementById('admin-actions').classList.remove('hidden');
-            } else {
-                document.getElementById('admin-badge').classList.add('hidden');
-                document.getElementById('admin-actions').classList.add('hidden');
+        // 更新排行榜数据
+        function updateRankingData() {
+            // 从本地存储重新加载最新数据
+            rankingData = loadRankingData();
+            
+            // 确保数据按分数降序排列，分数相同则按时间降序
+            rankingData.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return b.timestamp - a.timestamp;
+            });
+            
+            // 限制排行榜最多显示20条数据
+            if (rankingData.length > 20) {
+                rankingData = rankingData.slice(0, 20);
+                saveRankingData(rankingData); // 保存截断后的数据
             }
             
-            // 排序分数
-            const sortedScores = [...userScores].sort((a, b) => b.score - a.score);
-            
             // 更新前三名
-            updateTopThree(sortedScores);
+            document.getElementById('rank-1-name').textContent = rankingData[0]?.name || "暂无数据";
+            document.getElementById('rank-1-score').textContent = rankingData[0]?.score || "0";
+            document.getElementById('rank-2-name').textContent = rankingData[1]?.name || "暂无数据";
+            document.getElementById('rank-2-score').textContent = rankingData[1]?.score || "0";
+            document.getElementById('rank-3-name').textContent = rankingData[2]?.name || "暂无数据";
+            document.getElementById('rank-3-score').textContent = rankingData[2]?.score || "0";
             
-            // 更新排行榜列表
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = '';
-            
-            // 权限控制：普通用户只看前10名，管理员看所有
-            const displayData = isAdmin ? sortedScores : sortedScores.slice(0, 10);
-            
-            if (displayData.length === 0) {
-                rankingList.innerHTML = `
-                    <div class="grid grid-cols-4 py-3 px-4 border-b border-gray-100 text-center">
-                        <div class="text-gray-500">--</div>
-                        <div class="col-span-2 text-gray-500">暂无排名数据</div>
-                        <div class="text-gray-500">--</div>
+            // 更新其他排名（从第4名开始）
+            otherRanksEl.innerHTML = '';
+            for (let i = 3; i < rankingData.length && i < 10; i++) {
+                const rankItem = document.createElement('div');
+                rankItem.className = 'flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg';
+                rankItem.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-center text-xs font-bold mr-3 flex items-center justify-center">${i + 1}</span>
+                        <span>${rankingData[i].name}</span>
                     </div>
+                    <span class="text-secondary font-bold">${rankingData[i].score}</span>
+                `;
+                otherRanksEl.appendChild(rankItem);
+            }
+            
+            // 如果没有足够的数据，显示占位符
+            if (rankingData.length <= 3) {
+                for (let i = rankingData.length; i < 10; i++) {
+                    const rankItem = document.createElement('div');
+                    rankItem.className = 'flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg text-gray-400';
+                    rankItem.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 text-center text-xs font-bold mr-3 flex items-center justify-center">${i + 1}</span>
+                            <span>等待挑战者</span>
+                        </div>
+                        <span>--</span>
+                    `;
+                    otherRanksEl.appendChild(rankItem);
+                }
+            }
+            
+            // 更新我的排名
+            updateMyRank();
+        }
+
+        // 更新我的排名
+        function updateMyRank() {
+            if (!currentUser.name) {
+                myRankEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 rounded-full bg-primary text-white text-center text-xs font-bold mr-3 flex items-center justify-center">--</span>
+                        <span class="font-medium">请先保存你的成绩</span>
+                    </div>
+                    <span class="text-secondary font-bold">${currentUser.score}</span>
                 `;
                 return;
             }
             
-            // 渲染列表
-            displayData.forEach((user, index) => {
-                const rankItem = document.createElement('div');
-                rankItem.className = `grid grid-cols-4 py-3 px-4 border-b border-gray-100 text-center ${isAdmin ? 'rank-highlight' : ''}`;
-                
-                // 前三名特殊颜色
-                let rankClass = '';
-                if (index === 0) rankClass = 'text-yellow-500';
-                else if (index === 1) rankClass = 'text-gray-400';
-                else if (index === 2) rankClass = 'text-amber-700';
-                
-                rankItem.innerHTML = `
-                    <div class="font-medium ${rankClass}">${index + 1}</div>
-                    <div class="col-span-2 font-medium text-gray-800">${user.name}</div>
-                    <div class="font-bold text-secondary">${user.score}</div>
-                `;
-                
-                rankingList.appendChild(rankItem);
-            });
-            
-            // 管理员显示用户总数
-            if (isAdmin) {
-                const totalItem = document.createElement('div');
-                totalItem.className = 'grid grid-cols-4 py-3 px-4 bg-admin/5 font-medium text-admin';
-                totalItem.innerHTML = `
-                    <div>--</div>
-                    <div class="col-span-2">用户总数</div>
-                    <div>${sortedScores.length} 人</div>
-                `;
-                rankingList.appendChild(totalItem);
+            // 查找我的排名
+            let myRank = 1;
+            for (let i = 0; i < rankingData.length; i++) {
+                if (rankingData[i].score > currentUser.score) {
+                    myRank++;
+                } else if (rankingData[i].score === currentUser.score) {
+                    // 分数相同，时间晚的排名靠前
+                    const myEntry = rankingData.find(item => item.name === currentUser.name);
+                    if (myEntry && rankingData[i].timestamp > myEntry.timestamp) {
+                        myRank++;
+                    }
+                } else {
+                    break;
+                }
             }
+            
+            myRankEl.innerHTML = `
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full bg-primary text-white text-center text-xs font-bold mr-3 flex items-center justify-center">${myRank}</span>
+                    <span class="font-medium">我</span>
+                </div>
+                <span class="text-secondary font-bold">${currentUser.score}</span>
+            `;
         }
 
-        // 更新前三名展示
-        function updateTopThree(scores) {
-            const positions = [
-                { rank: 1, nameId: 'rank-1-name', scoreId: 'rank-1-score' },
-                { rank: 2, nameId: 'rank-2-name', scoreId: 'rank-2-score' },
-                { rank: 3, nameId: 'rank-3-name', scoreId: 'rank-3-score' }
-            ];
+        // 保存成绩
+        function saveScore() {
+            const username = usernameInput.value.trim() || '匿名用户' + Math.floor(Math.random() * 1000);
+            currentUser.name = username;
             
-            positions.forEach(pos => {
-                const user = scores[pos.rank - 1];
-                if (user) {
-                    document.getElementById(pos.nameId).textContent = user.name;
-                    document.getElementById(pos.scoreId).textContent = user.score;
+            // 从本地存储加载最新数据
+            rankingData = loadRankingData();
+            
+            // 检查是否已存在该用户
+            const existingIndex = rankingData.findIndex(item => item.name === username);
+            if (existingIndex >= 0) {
+                // 只更新更好的成绩
+                if (currentUser.score > rankingData[existingIndex].score) {
+                    rankingData[existingIndex].score = currentUser.score;
+                    rankingData[existingIndex].timestamp = new Date().getTime();
+                }
+            } else {
+                // 添加新用户
+                rankingData.push({
+                    name: username,
+                    score: currentUser.score,
+                    timestamp: new Date().getTime()
+                });
+            }
+            
+            // 保存到本地存储
+            saveRankingData(rankingData);
+            
+            currentUser.hasSaved = true;
+            hideSaveScoreModal();
+            showRanking();
+        }
+
+        // 显示保存成绩模态框
+        function showSaveScoreModal() {
+            if (currentUser.hasSaved) {
+                showRanking();
+                return;
+            }
+            
+            usernameInput.value = currentUser.name || '';
+            scoreToSaveEl.textContent = currentUser.score;
+            saveScoreModal.classList.remove('hidden');
+        }
+
+        // 隐藏保存成绩模态框
+        function hideSaveScoreModal() {
+            saveScoreModal.classList.add('hidden');
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 开始游戏
+            startBtn.addEventListener('click', () => {
+                startScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                initGame();
+            });
+
+            // 重新开始
+            restartBtn.addEventListener('click', () => {
+                endScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            });
+
+            // 查看排行榜
+            rankingBtn.addEventListener('click', showRanking);
+            rankingEndBtn.addEventListener('click', showRanking);
+            
+            // 从排行榜返回
+            backFromRankingBtn.addEventListener('click', () => {
+                rankingScreen.classList.add('hidden');
+                if (endScreen.classList.contains('hidden')) {
+                    startScreen.classList.remove('hidden');
                 } else {
-                    document.getElementById(pos.nameId).textContent = '暂无用户';
-                    document.getElementById(pos.scoreId).textContent = '0';
+                    endScreen.classList.remove('hidden');
+                }
+            });
+
+            // 验证关注状态
+            verifyFollowBtn.addEventListener('click', async () => {
+                const isFollowed = await checkFollowStatus();
+                if (isFollowed) {
+                    hasFollowed = true;
+                    hideFollowModal();
+                } else {
+                    alert('请先关注公众号才能继续');
+                }
+            });
+
+            // 确认作弊提示
+            confirmCheatBtn.addEventListener('click', () => {
+                hideCheatModal();
+                // 强制重新分享
+                showNegativeScoreModal();
+            });
+
+            // 显示提示
+            hintBtn.addEventListener('click', showHintModal);
+            
+            // 关闭提示
+            closeHintBtn.addEventListener('click', hideHintModal);
+
+            // 分享给好友
+            shareFriendBtn.addEventListener('click', () => {
+                if (isWechatEnv()) {
+                    shareStartTime = new Date().getTime(); // 记录分享开始时间
+                    wx.invoke('shareAppMessage', {});
+                } else {
+                    // 非微信环境模拟分享
+                    hasShared = true;
+                    hideNegativeScoreModal();
+                    loadNextQuestion();
+                }
+            });
+
+            // 分享到朋友圈
+            shareMomentsBtn.addEventListener('click', () => {
+                if (isWechatEnv()) {
+                    shareStartTime = new Date().getTime(); // 记录分享开始时间
+                    wx.invoke('shareTimeline', {});
+                } else {
+                    // 非微信环境模拟分享
+                    hasShared = true;
+                    hideNegativeScoreModal();
+                    loadNextQuestion();
+                }
+            });
+
+            // 保存成绩
+            saveScoreBtn.addEventListener('click', showSaveScoreModal);
+            confirmSaveBtn.addEventListener('click', saveScore);
+
+            // 页面可见性变化监测（离开界面扣分）
+            document.addEventListener('visibilitychange', () => {
+                const currentTime = new Date().getTime();
+                // 如果从不可见变为可见
+                if (document.visibilityState === 'visible' && gameScreen.classList.contains('hidden') === false) {
+                    const awayDuration = currentTime - lastVisibleTime;
+                    // 离开时间超过2秒视为离开界面
+                    if (awayDuration > 2000) {
+                        score -= 5; // 扣5分
+                        updateScore();
+                        showFeedback(`检测到离开界面，已扣除5分`, 'red');
+                    }
+                } else {
+                    lastVisibleTime = currentTime;
                 }
             });
         }
 
-        // 导出排名数据（管理员功能）
-        function exportRankingData() {
-            if (!isAdmin) return;
-            
-            // 生成CSV内容
-            let csvContent = "排名,用户名,分数,日期\n";
-            userScores.forEach((user, index) => {
-                csvContent += `${index + 1},${user.name},${user.score},${user.date}\n`;
-            });
-            
-            // 创建下载链接
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `文学问答排行榜_${new Date().toLocaleDateString()}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // 返回按钮功能
-        function goBack() {
-            rankingScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-        }
-
-        // 退出游戏
-        function quitGame() {
-            if (confirm('确定要退出游戏吗？当前进度将不保存。')) {
-                gameScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            }
-        }
-
-        // 重新挑战
-        function restartGame() {
-            endScreen.classList.add('hidden');
-            startGame();
-        }
+        // 初始化
+        window.addEventListener('load', () => {
+            initWechatSDK();
+            bindEvents();
+        });
     </script>
 </body>
 </html>
