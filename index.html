@@ -6,7 +6,6 @@
     <title>文学知识问答挑战</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -190,30 +189,30 @@
         </div>
     </div>
 
-    <!-- 关注公众号模态框 -->
+    <!-- 关注公众号模态框（核心修改：替换二维码+优化引导文案） -->
     <div id="follow-modal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
             <div class="bg-primary text-white p-5 text-center">
-                <i class="fa fa-lock text-2xl mb-2"></i>
-                <h3 class="text-xl font-bold">继续答题需关注公众号</h3>
-                <p class="opacity-90 text-sm mt-1">完成关注即可解锁全部题目</p>
+                <i class="fa fa-book text-2xl mb-2"></i>
+                <h3 class="text-xl font-bold">文青竞技场！解锁完整题库</h3>
+                <p class="opacity-90 text-sm mt-1">敢闯3题还不够！真正的文学爱好者从不半途而废</p>
             </div>
             
             <div class="p-5">
                 <div class="flex flex-col items-center">
-                    <!-- 公众号二维码 -->
+                    <!-- 公众号二维码（替换为附件图片，使用相对路径） -->
                     <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-5 border-4 border-white shadow-md pulse">
-                        <i class="fa fa-qrcode text-6xl text-gray-400"></i>
+                        <img src="微信公号.jpg" alt="沧海墨客公众号二维码" class="w-full h-full object-contain">
                     </div>
                     
                     <h4 class="text-lg font-bold mb-2">沧海墨客</h4>
                     <p class="text-gray-600 text-center text-sm mb-4">
                         长按二维码关注公众号<br>
-                        关注后验证即可继续答题
+                        解锁全部20题，后续高分更能迎好礼，文学造诣等你来证明！
                     </p>
                     
                     <button id="verify-follow-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
-                        <i class="fa fa-check-circle mr-1"></i> 已关注，验证并继续
+                        <i class="fa fa-check-circle mr-1"></i> 已关注，继续答题
                     </button>
                 </div>
             </div>
@@ -322,7 +321,6 @@
 
     <script>
         // 配置参数
-        const公众号APPID = "wx248e48ead0effab7";
         const REQUIRED_FOLLOW_AFTER = 2; // 第3题后强制关注（索引从0开始）
         let lastVisibleTime = new Date().getTime(); // 记录最后可见时间
         let shareStartTime = 0; // 分享开始时间
@@ -371,7 +369,7 @@
             hasSaved: false
         };
         
-        // 题库
+        // 完整的20道题题库
         const questions = [
             {
                 question: "《红楼梦》的作者是谁？",
@@ -545,91 +543,33 @@
         const myScoreEl = document.getElementById('my-score');
         const otherRanksEl = document.getElementById('other-ranks');
 
-        // 初始化微信SDK
-        function initWechatSDK() {
-            if (!isWechatEnv()) return;
-            
-            wx.config({
-                debug: false,
-                appId: 公众号APPID,
-                timestamp: new Date().getTime(),
-                nonceStr: Math.random().toString(36).substr(2, 15),
-                signature: '后端生成的签名',
-                jsApiList: ['checkIsFollowAccount', 'updateAppMessageShareData', 'updateTimelineShareData']
-            });
-            
-            wx.ready(() => {
-                console.log('微信SDK初始化完成');
-                setupShareConfig();
-            });
-        }
-
-        // 检查是否在微信环境
+        // 检查是否在微信环境（仅用于基础判断，无SDK依赖）
         function isWechatEnv() {
             return /MicroMessenger/i.test(navigator.userAgent);
         }
 
-        // 检查关注状态
+        // 检查关注状态（简化版，无SDK依赖）
         function checkFollowStatus() {
+            // 简化处理：微信环境下默认需要手动确认关注，非微信环境默认已关注
             if (!isWechatEnv()) {
-                return Promise.resolve(true); // 非微信环境默认已关注
+                return Promise.resolve(true);
             }
-            
+            // 实际场景中可引导用户手动确认，此处简化为弹窗提示
             return new Promise((resolve) => {
-                wx.checkIsFollowAccount({
-                    accountType: 1,
-                    success: function(res) {
-                        hasFollowed = res.result === 1;
-                        resolve(hasFollowed);
-                    },
-                    fail: function(err) {
-                        console.error('关注状态检测失败:', err);
-                        resolve(false);
-                    }
-                });
+                const isConfirmed = confirm('请确认已关注公众号“沧海墨客”，确认后继续答题');
+                resolve(isConfirmed);
             });
         }
 
-        // 设置分享配置
-        function setupShareConfig() {
-            const shareData = {
-                title: "文学知识问答挑战",
-                desc: "我正在挑战文学知识问答，快来试试！",
-                link: window.location.href,
-                imgUrl: "https://picsum.photos/id/24/200/200"
-            };
-            
-            // 分享给好友
-            wx.updateAppMessageShareData({
-                ...shareData,
-                success: function() {
-                    checkShareValidity();
-                }
-            });
-            
-            // 分享到朋友圈
-            wx.updateTimelineShareData({
-                ...shareData,
-                success: function() {
-                    checkShareValidity();
-                }
-            });
-        }
-
-        // 检查分享有效性（防作弊）
+        // 检查分享有效性（简化版）
         function checkShareValidity() {
             const shareDuration = new Date().getTime() - shareStartTime;
-            
-            // 检测分享是否有效（时长过短视为作弊）
             if (shareDuration < MIN_SHARE_DURATION) {
-                // 分享作弊处理
-                score -= 10; // 扣10分
+                score -= 10;
                 updateScore();
-                showCheatModal("分享时间过短，疑似作弊行为");
+                showCheatModal("分享时间过短，请重新分享");
                 return;
             }
-            
-            // 有效分享 - 仅本次有效，下次答错仍需分享
             hasShared = true;
             hideNegativeScoreModal();
             loadNextQuestion();
@@ -649,16 +589,11 @@
         // 显示提示模态框（增强版）
         function showHintModal() {
             if (hintRemaining <= 0) return;
-            
             hintContent.textContent = currentQuestionData.hint;
             hintRemainingEl.textContent = hintRemaining - 1;
             hintModal.classList.remove('hidden');
-            
-            // 使用一次提示
             hintRemaining--;
             hintCountEl.textContent = hintRemaining;
-            
-            // 如果没有提示次数了，禁用按钮
             if (hintRemaining <= 0) {
                 hintBtn.disabled = true;
                 hintBtn.classList.remove('pulse-soft', 'hover:bg-blue-600');
@@ -674,14 +609,12 @@
         // 获取随机题目索引（不重复）
         function getRandomQuestionIndex() {
             if (usedQuestionIndexes.length >= questions.length) {
-                usedQuestionIndexes = []; // 重置，防止无题目可用
+                usedQuestionIndexes = [];
             }
-            
             let randomIndex;
             do {
                 randomIndex = Math.floor(Math.random() * questions.length);
             } while (usedQuestionIndexes.includes(randomIndex));
-            
             usedQuestionIndexes.push(randomIndex);
             return randomIndex;
         }
@@ -692,7 +625,7 @@
             score = 0;
             usedQuestionIndexes = [];
             hasShared = false;
-            hintRemaining = 2; // 重置提示次数
+            hintRemaining = 2;
             hintCountEl.textContent = hintRemaining;
             hintBtn.disabled = false;
             hintBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
@@ -708,16 +641,12 @@
                 endGame();
                 return;
             }
-
             const randomIndex = getRandomQuestionIndex();
             currentQuestionData = questions[randomIndex];
-            
             questionEl.textContent = currentQuestionData.question;
             optionsEl.innerHTML = '';
             feedbackEl.classList.add('hidden');
-
             questionCountEl.textContent = `${currentQuestion + 1}/${questions.length}`;
-
             currentQuestionData.options.forEach((option, i) => {
                 const btn = document.createElement('button');
                 btn.className = 'w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-purple-50 transition-colors';
@@ -731,44 +660,31 @@
         function handleAnswerSelection(selectedIndex, correctIndex) {
             if (isProcessing) return;
             isProcessing = true;
-            
             const options = optionsEl.querySelectorAll('button');
-            
-            // 标记答案
             options.forEach((btn, i) => {
                 btn.disabled = true;
                 btn.classList.remove('hover:bg-purple-50');
-                
                 if (i === selectedIndex) {
                     if (i === correctIndex) {
                         btn.classList.add('bg-green-50', 'border-green-300');
-                        score += 10; // 答对加10分
+                        score += 10;
                         showFeedback('正确！', 'green');
                     } else {
                         btn.classList.add('bg-red-50', 'border-red-300');
                         options[correctIndex].classList.add('bg-green-50', 'border-green-300');
-                        score -= 5; // 答错扣5分
+                        score -= 5;
                         showFeedback(`错误，正确答案是: ${String.fromCharCode(65 + correctIndex)}`, 'red');
-                        // 答错后重置分享状态，下次负分需要重新分享
                         hasShared = false;
                     }
                 }
             });
-
             updateScore();
-            
-            // 延迟处理下一步
             setTimeout(() => {
-                // 核心逻辑：先检查是否需要关注公众号（第3题后）
                 if (currentQuestion === REQUIRED_FOLLOW_AFTER && !hasFollowed) {
                     showFollowModal();
-                }
-                // 再检查是否负分且未分享
-                else if (score < 0 && !hasShared) {
+                } else if (score < 0 && !hasShared) {
                     showNegativeScoreModal();
-                }
-                // 正常加载下一题
-                else {
+                } else {
                     loadNextQuestion();
                 }
                 isProcessing = false;
@@ -779,13 +695,11 @@
         function showFeedback(text, color) {
             feedbackEl.textContent = text;
             feedbackEl.className = 'p-3 rounded-lg mb-6 text-center';
-            
             if (color === 'green') {
                 feedbackEl.classList.add('bg-green-50', 'text-green-700');
             } else {
                 feedbackEl.classList.add('bg-red-50', 'text-red-700');
             }
-            
             feedbackEl.classList.remove('hidden');
         }
 
@@ -828,7 +742,6 @@
         function showNegativeScoreModal() {
             negativeScoreModal.classList.remove('hidden');
             negativeScoreEl.textContent = score;
-            // 记录分享开始时间（用于防作弊检测）
             shareStartTime = new Date().getTime();
         }
 
@@ -843,39 +756,28 @@
             gameScreen.classList.add('hidden');
             endScreen.classList.add('hidden');
             rankingScreen.classList.remove('hidden');
-            
-            // 更新排行榜数据
             updateRankingData();
         }
 
         // 更新排行榜数据
         function updateRankingData() {
-            // 从本地存储重新加载最新数据
             rankingData = loadRankingData();
-            
-            // 确保数据按分数降序排列，分数相同则按时间降序
             rankingData.sort((a, b) => {
                 if (b.score !== a.score) {
                     return b.score - a.score;
                 }
                 return b.timestamp - a.timestamp;
             });
-            
-            // 限制排行榜最多显示20条数据
             if (rankingData.length > 20) {
                 rankingData = rankingData.slice(0, 20);
-                saveRankingData(rankingData); // 保存截断后的数据
+                saveRankingData(rankingData);
             }
-            
-            // 更新前三名
             document.getElementById('rank-1-name').textContent = rankingData[0]?.name || "暂无数据";
             document.getElementById('rank-1-score').textContent = rankingData[0]?.score || "0";
             document.getElementById('rank-2-name').textContent = rankingData[1]?.name || "暂无数据";
             document.getElementById('rank-2-score').textContent = rankingData[1]?.score || "0";
             document.getElementById('rank-3-name').textContent = rankingData[2]?.name || "暂无数据";
             document.getElementById('rank-3-score').textContent = rankingData[2]?.score || "0";
-            
-            // 更新其他排名（从第4名开始）
             otherRanksEl.innerHTML = '';
             for (let i = 3; i < rankingData.length && i < 10; i++) {
                 const rankItem = document.createElement('div');
@@ -889,8 +791,6 @@
                 `;
                 otherRanksEl.appendChild(rankItem);
             }
-            
-            // 如果没有足够的数据，显示占位符
             if (rankingData.length <= 3) {
                 for (let i = rankingData.length; i < 10; i++) {
                     const rankItem = document.createElement('div');
@@ -905,8 +805,6 @@
                     otherRanksEl.appendChild(rankItem);
                 }
             }
-            
-            // 更新我的排名
             updateMyRank();
         }
 
@@ -922,14 +820,11 @@
                 `;
                 return;
             }
-            
-            // 查找我的排名
             let myRank = 1;
             for (let i = 0; i < rankingData.length; i++) {
                 if (rankingData[i].score > currentUser.score) {
                     myRank++;
                 } else if (rankingData[i].score === currentUser.score) {
-                    // 分数相同，时间晚的排名靠前
                     const myEntry = rankingData.find(item => item.name === currentUser.name);
                     if (myEntry && rankingData[i].timestamp > myEntry.timestamp) {
                         myRank++;
@@ -938,7 +833,6 @@
                     break;
                 }
             }
-            
             myRankEl.innerHTML = `
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full bg-primary text-white text-center text-xs font-bold mr-3 flex items-center justify-center">${myRank}</span>
@@ -952,30 +846,21 @@
         function saveScore() {
             const username = usernameInput.value.trim() || '匿名用户' + Math.floor(Math.random() * 1000);
             currentUser.name = username;
-            
-            // 从本地存储加载最新数据
             rankingData = loadRankingData();
-            
-            // 检查是否已存在该用户
             const existingIndex = rankingData.findIndex(item => item.name === username);
             if (existingIndex >= 0) {
-                // 只更新更好的成绩
                 if (currentUser.score > rankingData[existingIndex].score) {
                     rankingData[existingIndex].score = currentUser.score;
                     rankingData[existingIndex].timestamp = new Date().getTime();
                 }
             } else {
-                // 添加新用户
                 rankingData.push({
                     name: username,
                     score: currentUser.score,
                     timestamp: new Date().getTime()
                 });
             }
-            
-            // 保存到本地存储
             saveRankingData(rankingData);
-            
             currentUser.hasSaved = true;
             hideSaveScoreModal();
             showRanking();
@@ -987,7 +872,6 @@
                 showRanking();
                 return;
             }
-            
             usernameInput.value = currentUser.name || '';
             scoreToSaveEl.textContent = currentUser.score;
             saveScoreModal.classList.remove('hidden');
@@ -1034,14 +918,13 @@
                     hasFollowed = true;
                     hideFollowModal();
                 } else {
-                    alert('请先关注公众号才能继续');
+                    alert('请先关注公众号“沧海墨客”才能继续');
                 }
             });
 
             // 确认作弊提示
             confirmCheatBtn.addEventListener('click', () => {
                 hideCheatModal();
-                // 强制重新分享
                 showNegativeScoreModal();
             });
 
@@ -1054,10 +937,9 @@
             // 分享给好友
             shareFriendBtn.addEventListener('click', () => {
                 if (isWechatEnv()) {
-                    shareStartTime = new Date().getTime(); // 记录分享开始时间
-                    wx.invoke('shareAppMessage', {});
+                    shareStartTime = new Date().getTime();
+                    alert('请点击右上角菜单，选择“发送给朋友”完成分享');
                 } else {
-                    // 非微信环境模拟分享
                     hasShared = true;
                     hideNegativeScoreModal();
                     loadNextQuestion();
@@ -1067,10 +949,9 @@
             // 分享到朋友圈
             shareMomentsBtn.addEventListener('click', () => {
                 if (isWechatEnv()) {
-                    shareStartTime = new Date().getTime(); // 记录分享开始时间
-                    wx.invoke('shareTimeline', {});
+                    shareStartTime = new Date().getTime();
+                    alert('请点击右上角菜单，选择“分享到朋友圈”完成分享');
                 } else {
-                    // 非微信环境模拟分享
                     hasShared = true;
                     hideNegativeScoreModal();
                     loadNextQuestion();
@@ -1084,12 +965,10 @@
             // 页面可见性变化监测（离开界面扣分）
             document.addEventListener('visibilitychange', () => {
                 const currentTime = new Date().getTime();
-                // 如果从不可见变为可见
-                if (document.visibilityState === 'visible' && gameScreen.classList.contains('hidden') === false) {
+                if (document.visibilityState === 'visible' && !gameScreen.classList.contains('hidden')) {
                     const awayDuration = currentTime - lastVisibleTime;
-                    // 离开时间超过2秒视为离开界面
                     if (awayDuration > 2000) {
-                        score -= 5; // 扣5分
+                        score -= 5;
                         updateScore();
                         showFeedback(`检测到离开界面，已扣除5分`, 'red');
                     }
@@ -1101,7 +980,6 @@
 
         // 初始化
         window.addEventListener('load', () => {
-            initWechatSDK();
             bindEvents();
         });
     </script>
