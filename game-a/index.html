@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沧海墨客·墨客小筑</title>
+    <!-- 1. 新增：微信JS-SDK官方CDN（放在最前面） -->
+    <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <!-- 原有外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        /* 自定义古风样式 */
+        .ancient-bg { 
+            background-image: url('https://picsum.photos/id/1060/1080/1920'); /* 可替换为你的古风背景图 */
+            background-size: cover; 
+            background-attachment: fixed;
+        }
+        .ancient-btn { 
+            border: 2px solid #8B4513; 
+            color: #8B4513; 
+            transition: all 0.3s; 
+            background-color: rgba(255,255,255,0.8);
+        }
+        .ancient-btn:hover { 
+            background-color: #8B4513; 
+            color: #fff; 
+        }
+        .guide-text { 
+            color: #8B4513; 
+            font-weight: bold; 
+            text-align: center; 
+            margin: 10px 0; 
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+        /* 弹窗样式 */
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 999; 
+        }
+        .modal-content { 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        /* 分享海报容器样式 */
+        #posterContainer { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center;
+        }
+        #posterCanvas { 
+            max-width: 90%; 
+            max-height: 80%; 
+            border: 4px solid #fff;
+        }
+        /* 未登录提示样式 */
+        .unlogin-tip { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: rgba(139,69,19,0.9); 
+            color: #fff; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            z-index: 998; 
+            display: none;
+        }
+    </style>
+</head>
+<body class="ancient-bg min-h-screen p-4">
+    <!-- 引导语 -->
+    <div class="guide-text">来墨客小筑答文学好题，迎精致好礼</div>
 
+    <!-- 未登录提示 -->
+    <div id="unloginTip" class="unlogin-tip">未登录仅可体验1道题，登录解锁全部功能</div>
+
+    <!-- 2. 新增：非微信浏览器引导弹窗 -->
+    <div id="browserTipModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl text-[#8B4513] mb-4">请在微信内打开</h3>
+            <p class="text-gray-600 mb-6">
+                1. 保存下方公众号二维码<br>
+                2. 打开微信"扫一扫"识别<br>
+                3. 点击菜单即可登录游戏
+            </p>
+            <div class="text-center">
+                <!-- 替换为你的公众号二维码图片地址（必须是公网可访问的链接） -->
+                <img src="https://替换为你的公众号二维码地址.png" alt="公众号二维码" style="width: 200px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 新增：公众号菜单引导弹窗（替换原手动登录弹窗） -->
+    <div id="menuTipModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <h3 class="text-xl text-[#8B4513] mb-4">请通过公众号菜单进入</h3>
+            <p class="text-gray-600 mb-4">
+                1. 返回「墨客小筑」公众号首页<br>
+                2. 点击底部菜单「进入游戏」<br>
+                3. 自动完成登录，无需手动输入
+            </p>
+            <!-- 手动登录兜底选项 -->
+            <p class="text-[#8B4513] cursor-pointer text-center mb-6" onclick="showManualLogin()">
+                无法通过菜单进入？点击手动登录 ↓
+            </p>
+            <div class="text-center">
+                <!-- 替换为你的公众号二维码图片地址（必须是公网可访问的链接） -->
+                <img src="https://替换为你的公众号二维码地址.png" alt="公众号二维码" style="width: 200px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 手动登录弹窗（兜底用，默认隐藏） -->
+    <div id="manualLoginModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl text-[#8B4513] mb-4">手动登录</h3>
+            <input type="text" id="wechatNo" placeholder="请输入微信号" class="w-full p-2 border border-gray-300 rounded mb-3">
+            <input type="text" id="nickname" placeholder="请输入昵称" class="w-full p-2 border border-gray-300 rounded mb-3">
+            <button id="manualLoginBtn" class="ancient-btn w-full p-2 rounded">登录并进入游戏</button>
+            <p class="text-xs text-gray-500 mt-3">未登录仅可体验1道题，登录解锁全部功能</p>
+        </div>
+    </div>
+
+    <!-- 游戏主菜单（默认隐藏） -->
+    <div id="gameMenu" class="hidden">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl text-[#8B4513] font-bold">墨客小筑</h1>
+            <p id="userInfo" class="text-sm text-gray-600"></p>
+            <p id="scoreInfo" class="text-sm text-gray-600">当前总分：0</p>
+        </div>
+        <!-- 模块入口按钮 -->
+        <div class="grid grid-cols-1 gap-4 mb-6">
+            <button id="mohenBtn" class="ancient-btn p-4 rounded text-lg">
+                <i class="fa fa-book mr-2"></i>墨痕寻踪（唐诗·宋词）
+            </button>
+            <button id="canghaiBtn" class="ancient-btn p-4 rounded text-lg">
+                <i class="fa fa-pencil mr-2"></i>沧海杯（诗词填空）
+            </button>
+            <button id="wendaBtn" class="ancient-btn p-4 rounded text-lg">
+                <i class="fa fa-question-circle mr-2"></i>文学知识问答（古今中外）
+            </button>
+        </div>
+        <!-- 功能按钮 -->
+        <div class="grid grid-cols-2 gap-4">
+            <button id="shareBtn" class="ancient-btn p-2 rounded">
+                <i class="fa fa-share-alt mr-1"></i>分享数据
+            </button>
+            <button id="adminBtn" class="ancient-btn p-2 rounded" onclick="showModal('adminLoginModal')">
+                <i class="fa fa-lock mr-1"></i>管理员入口
+            </button>
+        </div>
+    </div>
+
+    <!-- 游戏容器（默认隐藏） -->
+    <div id="gameContainer" class="hidden"></div>
+
+    <!-- 管理员登录弹窗（默认隐藏） -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl text-[#8B4513] mb-4">管理员登录</h3>
+            <input type="password" id="adminPwd" placeholder="请输入管理员密码" class="w-full p-2 border border-gray-300 rounded mb-4">
+            <button id="adminLoginBtn" class="ancient-btn w-full p-2 rounded">登录</button>
+            <p class="text-xs text-red-500 mt-2" id="adminPwdTip" style="display: none;">密码错误，请重试</p>
+        </div>
+    </div>
+
+    <!-- 管理员统计页面（默认隐藏） -->
+    <div id="adminPage" class="hidden">
+        <h2 class="text-xl text-[#8B4513] text-center mb-4">数据统计页面</h2>
+        <div class="mb-4">
+            <input type="text" id="searchWechat" placeholder="搜索微信号" class="w-full p-2 border border-gray-300 rounded mb-2">
+            <button id="searchBtn" class="ancient-btn w-full p-2 rounded">搜索</button>
+        </div>
+        <div class="overflow-x-auto mb-4">
+            <table class="w-full border-collapse bg-white/90 rounded-lg">
+                <thead>
+                    <tr class="border-b-2 border-[#8B4513] bg-[#8B4513]/10">
+                        <th class="p-2 text-left">微信号</th>
+                        <th class="p-2 text-left">昵称</th>
+                        <th class="p-2 text-left">总分</th>
+                        <th class="p-2 text-left">墨痕分</th>
+                        <th class="p-2 text-left">沧海分</th>
+                        <th class="p-2 text-left">问答分</th>
+                        <th class="p-2 text-left">备注</th>
+                    </tr>
+                </thead>
+                <tbody id="statTableBody">
+                </tbody>
+            </table>
+        </div>
+        <button id="exportBtn" class="ancient-btn w-full p-2 rounded">导出Excel</button>
+        <button id="backMenuBtn" class="ancient-btn w-full p-2 rounded mt-2">返回主菜单</button>
+    </div>
+
+    <!-- 分享海报容器（默认隐藏） -->
+    <div id="posterContainer" class="modal">
+        <div class="text-center text-white mb-2">
+            <button id="closePosterBtn" class="text-white bg-[#8B4513]/80 px-4 py-1 rounded mb-2">关闭海报</button>
+            <p class="text-sm">长按海报保存，分享至朋友圈</p>
+        </div>
+        <canvas id="posterCanvas"></canvas>
+    </div>
+
+    <!-- 引入核心逻辑JS -->
+    <script src="js/main.js"></script>
+</body>
+</html>
