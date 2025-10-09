@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>星际战机 - 完整版</title>
+    <title>星际战机 - 优化版</title>
     <style>
         * {
             margin: 0;
@@ -181,32 +181,68 @@
             background: rgba(10, 10, 42, 0.9);
             padding: 15px;
             z-index: 100;
-            height: 120px;
         }
         
-        .touch-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
         }
         
-        .touch-area {
-            width: 45%;
-            height: 100%;
-            background-color: rgba(74, 74, 255, 0.2);
+        .dpad-button {
+            background-color: rgba(74, 74, 255, 0.8);
+            border: none;
             border-radius: 10px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.2rem;
-            user-select: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
         }
         
-        .shoot-area {
-            background-color: rgba(255, 74, 74, 0.2);
+        .dpad-button:active {
+            background-color: rgba(100, 100, 255, 0.9);
+            transform: scale(0.95);
+        }
+        
+        .center {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: rgba(74, 74, 255, 0.5);
+        }
+        
+        .up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
         }
         
         .action-button {
@@ -271,7 +307,10 @@
             }
             
             .mobile-controller {
-                display: block;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px;
             }
             
             h1 {
@@ -319,8 +358,9 @@
                 height: 100px;
             }
             
-            .touch-area {
-                font-size: 1rem;
+            .dpad {
+                width: 150px;
+                height: 150px;
             }
         }
         
@@ -354,7 +394,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>星际战机 - 完整版</h1>
+            <h1>星际战机 - 优化版</h1>
             <p>使用键盘或触摸控制你的战机，消灭敌机！</p>
         </header>
         
@@ -404,8 +444,8 @@
                 
                 <div class="panel-section">
                     <h2>手机控制</h2>
-                    <p>左侧区域滑动: 移动战机</p>
-                    <p>右侧区域点击: 发射子弹</p>
+                    <p>使用下方方向键移动</p>
+                    <p>点击射击按钮发射</p>
                 </div>
             </div>
         </div>
@@ -414,8 +454,8 @@
             <h2>游戏说明</h2>
             <ol>
                 <li>点击"开始游戏"按钮开始游戏</li>
-                <li>使用键盘方向键或手机滑动控制战机移动</li>
-                <li>使用S键或手机右侧区域发射子弹</li>
+                <li>使用键盘方向键或手机方向键控制战机移动</li>
+                <li>使用S键或手机射击按钮发射子弹</li>
                 <li>躲避敌机，射击敌机获得分数</li>
                 <li>每得1000分提升一个等级，敌机速度会加快</li>
                 <li>被敌机撞击会损失生命，生命值为0时游戏结束</li>
@@ -426,13 +466,15 @@
     </div>
     
     <div class="mobile-controller">
-        <div class="touch-controls">
-            <div class="touch-area" id="moveArea">
-                滑动控制方向
-            </div>
-            <div class="touch-area shoot-area" id="shootArea">
-                点击射击
-            </div>
+        <div class="dpad">
+            <button class="dpad-button up">↑</button>
+            <button class="dpad-button left">←</button>
+            <div class="dpad-button center"></div>
+            <button class="dpad-button right">→</button>
+            <button class="dpad-button down">↓</button>
+        </div>
+        <div class="action-buttons">
+            <button class="action-button" id="mobileShoot">射击</button>
         </div>
     </div>
 
@@ -454,6 +496,7 @@
             // 音效控制
             let bgmEnabled = true;
             let sfxEnabled = true;
+            let bgmPlaying = false;
             
             // 游戏状态
             let gameState = {
@@ -484,11 +527,6 @@
                     down: false
                 }
             };
-            
-            // 触摸控制变量
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let isTouching = false;
             
             // 爆炸效果类
             class Explosion {
@@ -586,14 +624,6 @@
                 }
             }
             
-            // 创建爆炸效果
-            function createExplosion(x, y) {
-                gameState.explosions.push(new Explosion(x, y));
-                if (sfxEnabled) {
-                    playSound('explosion');
-                }
-            }
-            
             // 音效播放函数
             function playSound(type) {
                 if (!sfxEnabled) return;
@@ -656,7 +686,7 @@
             
             // 背景音乐
             function playBGM() {
-                if (!bgmEnabled) return;
+                if (!bgmEnabled || bgmPlaying) return;
                 
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
@@ -676,6 +706,7 @@
                 function playNote(index) {
                     if (!bgmEnabled || !gameState.isRunning || gameState.isPaused) {
                         oscillator.stop();
+                        bgmPlaying = false;
                         return;
                     }
                     
@@ -692,7 +723,19 @@
                 }
                 
                 oscillator.start();
+                bgmPlaying = true;
                 playNote(0);
+            }
+            
+            // 停止背景音乐
+            function stopBGM() {
+                bgmPlaying = false;
+            }
+            
+            // 创建爆炸效果
+            function createExplosion(x, y) {
+                gameState.explosions.push(new Explosion(x, y));
+                playSound('explosion');
             }
             
             // 绘制玩家飞机
@@ -932,6 +975,7 @@
                 gameState.isRunning = false;
                 document.getElementById('finalScore').textContent = gameState.score;
                 document.getElementById('gameOverScreen').style.display = 'flex';
+                stopBGM();
             }
             
             // 开始游戏
@@ -954,9 +998,7 @@
                     document.getElementById('gameOverScreen').style.display = 'none';
                     
                     // 播放背景音乐
-                    if (bgmEnabled) {
-                        playBGM();
-                    }
+                    playBGM();
                 }
             }
             
@@ -966,6 +1008,12 @@
                     gameState.isPaused = !gameState.isPaused;
                     document.getElementById('pauseBtn').textContent = 
                         gameState.isPaused ? '继续游戏' : '暂停游戏';
+                    
+                    if (gameState.isPaused) {
+                        stopBGM();
+                    } else {
+                        playBGM();
+                    }
                 }
             }
             
@@ -979,6 +1027,7 @@
                 document.getElementById('pauseBtn').textContent = '暂停游戏';
                 document.getElementById('gameOverScreen').style.display = 'none';
                 
+                stopBGM();
                 drawGame();
                 updateUI();
             }
@@ -991,6 +1040,8 @@
                 
                 if (bgmEnabled && gameState.isRunning && !gameState.isPaused) {
                     playBGM();
+                } else {
+                    stopBGM();
                 }
             }
             
@@ -1059,69 +1110,39 @@
                     }
                 });
                 
-                // 移动设备控制 - 滑动控制
-                const moveArea = document.getElementById('moveArea');
-                const shootArea = document.getElementById('shootArea');
+                // 移动设备控制
+                const upBtn = document.querySelector('.dpad-button.up');
+                const downBtn = document.querySelector('.dpad-button.down');
+                const leftBtn = document.querySelector('.dpad-button.left');
+                const rightBtn = document.querySelector('.dpad-button.right');
+                const shootBtn = document.getElementById('mobileShoot');
                 
-                // 触摸开始
-                moveArea.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    isTouching = true;
-                    const touch = e.touches[0];
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                });
+                // 添加触摸事件 - 方向控制
+                function setupDirectionButton(button, direction) {
+                    button.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        player.moving[direction] = true;
+                    });
+                    
+                    button.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        player.moving[direction] = false;
+                    });
+                    
+                    // 防止按钮失去焦点
+                    button.addEventListener('touchcancel', function(e) {
+                        e.preventDefault();
+                        player.moving[direction] = false;
+                    });
+                }
                 
-                // 触摸移动
-                moveArea.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                    if (!isTouching || !gameState.isRunning || gameState.isPaused) return;
-                    
-                    const touch = e.touches[0];
-                    const deltaX = touch.clientX - touchStartX;
-                    const deltaY = touch.clientY - touchStartY;
-                    
-                    // 重置移动状态
-                    player.moving.left = false;
-                    player.moving.right = false;
-                    player.moving.up = false;
-                    player.moving.down = false;
-                    
-                    // 根据滑动方向设置移动状态
-                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                        // 水平滑动
-                        if (deltaX > 10) {
-                            player.moving.right = true;
-                        } else if (deltaX < -10) {
-                            player.moving.left = true;
-                        }
-                    } else {
-                        // 垂直滑动
-                        if (deltaY > 10) {
-                            player.moving.down = true;
-                        } else if (deltaY < -10) {
-                            player.moving.up = true;
-                        }
-                    }
-                    
-                    // 更新起始点，实现连续滑动
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                });
+                setupDirectionButton(upBtn, 'up');
+                setupDirectionButton(downBtn, 'down');
+                setupDirectionButton(leftBtn, 'left');
+                setupDirectionButton(rightBtn, 'right');
                 
-                // 触摸结束
-                moveArea.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    isTouching = false;
-                    // 停止所有移动
-                    player.moving.left = false;
-                    player.moving.right = false;
-                    player.moving.up = false;
-                    player.moving.down = false;
-                });
-                
-                // 射击区域
-                shootArea.addEventListener('touchstart', function(e) {
+                // 射击按钮
+                shootBtn.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                     if (!gameState.isRunning || gameState.isPaused) return;
                     shoot();
