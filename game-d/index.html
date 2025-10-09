@@ -2,63 +2,71 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飞行射击游戏 - 蓝牙控制</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>手机版飞行射击游戏</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             color: white;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
+            touch-action: manipulation;
         }
         
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 1200px;
             width: 100%;
+            max-width: 500px;
+            height: 100%;
         }
         
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             width: 100%;
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
-        .game-container {
+        .game-stats {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
+            justify-content: space-between;
             width: 100%;
+            background-color: rgba(10, 10, 42, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
         }
         
         .game-area {
             position: relative;
-            width: 600px;
-            height: 500px;
+            width: 100%;
+            flex-grow: 1;
             background-color: #0a0a2a;
             border: 3px solid #4a4aff;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(74, 74, 255, 0.5);
+            margin-bottom: 10px;
         }
         
         #gameCanvas {
@@ -66,30 +74,10 @@
             height: 100%;
         }
         
-        .control-panel {
-            background-color: rgba(10, 10, 42, 0.8);
-            border: 2px solid #4a4aff;
-            border-radius: 10px;
-            padding: 20px;
-            width: 300px;
-            box-shadow: 0 0 15px rgba(74, 74, 255, 0.3);
-        }
-        
-        .panel-section {
-            margin-bottom: 20px;
-        }
-        
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #4a4aff;
-            border-bottom: 1px solid #4a4aff;
-            padding-bottom: 5px;
-        }
-        
-        .stats {
+        .control-buttons {
             display: flex;
             justify-content: space-between;
+            width: 100%;
             margin-bottom: 10px;
         }
         
@@ -97,13 +85,13 @@
             background: linear-gradient(to bottom, #4a4aff, #1a1a7a);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
+            padding: 12px 15px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: bold;
-            width: 100%;
-            margin-bottom: 10px;
+            flex: 1;
+            margin: 0 5px;
             transition: all 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
@@ -126,74 +114,49 @@
             box-shadow: none;
         }
         
-        .status {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        
-        .instructions {
-            background-color: rgba(10, 10, 42, 0.8);
-            border: 2px solid #4a4aff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 930px;
-        }
-        
-        .instructions h2 {
-            text-align: center;
-        }
-        
-        .instructions ol {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-        
         .mobile-controller {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 42, 0.9);
-            padding: 15px;
-            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 15px 0;
+            background: rgba(10, 10, 42, 0.8);
+            border-radius: 15px;
+            margin-top: auto;
         }
         
         .dpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 5px;
+            gap: 8px;
             width: 150px;
             height: 150px;
-            margin: 0 auto;
+            margin-left: 20px;
         }
         
         .dpad-button {
-            background-color: #4a4aff;
+            background-color: rgba(74, 74, 255, 0.8);
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+        
+        .dpad-button:active {
+            background-color: rgba(100, 100, 255, 0.9);
+            transform: scale(0.95);
         }
         
         .center {
             grid-column: 2;
             grid-row: 2;
+            background-color: rgba(74, 74, 255, 0.5);
         }
         
         .up {
@@ -218,8 +181,10 @@
         
         .action-buttons {
             display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: 20px;
+            gap: 15px;
         }
         
         .action-button {
@@ -232,16 +197,107 @@
             font-size: 1.2rem;
             font-weight: bold;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
         }
         
-        @media (max-width: 768px) {
-            .game-area {
-                width: 100%;
-                height: 400px;
+        .action-button:active {
+            background: linear-gradient(to bottom, #ff6a6a, #d30000);
+            transform: scale(0.95);
+        }
+        
+        .instructions {
+            background-color: rgba(10, 10, 42, 0.8);
+            border: 2px solid #4a4aff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        
+        .instructions h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #4a4aff;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            display: none;
+        }
+        
+        .game-over h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ff4a4a;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-height: 700px) {
+            .mobile-controller {
+                padding: 10px 0;
             }
             
-            .mobile-controller {
-                display: block;
+            .dpad {
+                width: 130px;
+                height: 130px;
+            }
+            
+            .action-button {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .instructions {
+                display: none;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .game-stats {
+                padding: 5px;
+                font-size: 1rem;
+            }
+            
+            .control-buttons {
+                margin-bottom: 5px;
+            }
+            
+            .button {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            header p {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -249,84 +305,70 @@
 <body>
     <div class="container">
         <header>
-            <h1>星际战机 - 蓝牙控制版</h1>
-            <p>使用手机蓝牙连接控制你的战机，消灭敌机！</p>
+            <h1>星际战机</h1>
+            <p>使用虚拟摇杆控制你的战机，消灭敌机！</p>
         </header>
         
-        <div class="game-container">
-            <div class="game-area">
-                <canvas id="gameCanvas"></canvas>
+        <div class="game-stats">
+            <div>得分: <span id="score">0</span></div>
+            <div>生命: <span id="lives">3</span></div>
+            <div>等级: <span id="level">1</span></div>
+        </div>
+        
+        <div class="control-buttons">
+            <button id="startBtn" class="button">开始游戏</button>
+            <button id="pauseBtn" class="button" disabled>暂停</button>
+            <button id="resetBtn" class="button">重置</button>
+        </div>
+        
+        <div class="game-area">
+            <canvas id="gameCanvas"></canvas>
+            <div class="game-over" id="gameOverScreen">
+                <h2>游戏结束</h2>
+                <p>得分: <span id="finalScore">0</span></p>
+                <button id="restartBtn" class="button">重新开始</button>
             </div>
-            
-            <div class="control-panel">
-                <div class="panel-section">
-                    <h2>游戏状态</h2>
-                    <div class="stats">
-                        <span>得分: <span id="score">0</span></span>
-                        <span>生命: <span id="lives">3</span></span>
-                    </div>
-                    <div class="stats">
-                        <span>等级: <span id="level">1</span></span>
-                        <span>敌机: <span id="enemies">0</span></span>
-                    </div>
-                </div>
-                
-                <div class="panel-section">
-                    <h2>蓝牙连接</h2>
-                    <button id="connectBtn" class="button">连接蓝牙控制器</button>
-                    <div id="connectionStatus" class="status">未连接</div>
-                </div>
-                
-                <div class="panel-section">
-                    <h2>游戏控制</h2>
-                    <button id="startBtn" class="button">开始游戏</button>
-                    <button id="pauseBtn" class="button" disabled>暂停游戏</button>
-                    <button id="resetBtn" class="button">重置游戏</button>
-                </div>
-                
-                <div class="panel-section">
-                    <h2>键盘控制</h2>
-                    <p>方向键: 移动战机</p>
-                    <p>空格键: 发射子弹</p>
-                </div>
+        </div>
+        
+        <div class="mobile-controller">
+            <div class="dpad">
+                <button class="dpad-button up">↑</button>
+                <button class="dpad-button left">←</button>
+                <div class="dpad-button center"></div>
+                <button class="dpad-button right">→</button>
+                <button class="dpad-button down">↓</button>
+            </div>
+            <div class="action-buttons">
+                <button class="action-button" id="mobileShoot">射击</button>
             </div>
         </div>
         
         <div class="instructions">
             <h2>游戏说明</h2>
             <ol>
-                <li>点击"开始游戏"按钮开始游戏</li>
-                <li>点击"连接蓝牙控制器"将手机与游戏连接</li>
-                <li>使用手机控制界面或键盘控制战机移动和射击</li>
+                <li>使用方向按钮控制战机移动</li>
+                <li>点击射击按钮发射子弹</li>
                 <li>躲避敌机，射击敌机获得分数</li>
                 <li>每得1000分提升一个等级，敌机速度会加快</li>
                 <li>被敌机撞击会损失生命，生命值为0时游戏结束</li>
             </ol>
         </div>
     </div>
-    
-    <div class="mobile-controller">
-        <div class="dpad">
-            <button class="dpad-button up">↑</button>
-            <button class="dpad-button left">←</button>
-            <div class="dpad-button center"></div>
-            <button class="dpad-button right">→</button>
-            <button class="dpad-button down">↓</button>
-        </div>
-        <div class="action-buttons">
-            <button class="action-button" id="mobileShoot">射击</button>
-        </div>
-    </div>
 
     <script>
-        // 游戏主逻辑
         document.addEventListener('DOMContentLoaded', function() {
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             
             // 设置Canvas尺寸
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            function resizeCanvas() {
+                const gameArea = document.querySelector('.game-area');
+                canvas.width = gameArea.clientWidth;
+                canvas.height = gameArea.clientHeight;
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
             
             // 游戏状态
             let gameState = {
@@ -348,7 +390,13 @@
                 color: '#4a4aff',
                 bullets: [],
                 lastShot: 0,
-                shootDelay: 300
+                shootDelay: 300,
+                moving: {
+                    left: false,
+                    right: false,
+                    up: false,
+                    down: false
+                }
             };
             
             // 敌机
@@ -440,6 +488,22 @@
                 }
             }
             
+            // 更新玩家位置
+            function updatePlayer() {
+                if (player.moving.left) {
+                    player.x = Math.max(0, player.x - player.speed);
+                }
+                if (player.moving.right) {
+                    player.x = Math.min(canvas.width - player.width, player.x + player.speed);
+                }
+                if (player.moving.up) {
+                    player.y = Math.max(0, player.y - player.speed);
+                }
+                if (player.moving.down) {
+                    player.y = Math.min(canvas.height - player.height, player.y + player.speed);
+                }
+            }
+            
             // 检测碰撞
             function checkCollisions() {
                 // 子弹与敌机碰撞
@@ -486,6 +550,9 @@
             // 更新游戏状态
             function updateGame() {
                 if (!gameState.isRunning || gameState.isPaused) return;
+                
+                // 更新玩家位置
+                updatePlayer();
                 
                 // 更新子弹
                 for (let i = player.bullets.length - 1; i >= 0; i--) {
@@ -560,11 +627,11 @@
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = '30px Arial';
+                    ctx.font = '24px Arial';
                     ctx.textAlign = 'center';
                     ctx.fillText('星际战机', canvas.width / 2, canvas.height / 2 - 30);
-                    ctx.font = '20px Arial';
-                    ctx.fillText('按开始游戏按钮开始', canvas.width / 2, canvas.height / 2 + 20);
+                    ctx.font = '16px Arial';
+                    ctx.fillText('点击"开始游戏"按钮开始', canvas.width / 2, canvas.height / 2 + 20);
                     ctx.textAlign = 'left';
                 } else if (gameState.isPaused) {
                     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -583,13 +650,13 @@
                 document.getElementById('score').textContent = gameState.score;
                 document.getElementById('lives').textContent = gameState.lives;
                 document.getElementById('level').textContent = gameState.level;
-                document.getElementById('enemies').textContent = gameState.enemies.length;
             }
             
             // 游戏结束
             function gameOver() {
                 gameState.isRunning = false;
-                alert(`游戏结束！你的得分是: ${gameState.score}`);
+                document.getElementById('finalScore').textContent = gameState.score;
+                document.getElementById('gameOverScreen').style.display = 'flex';
             }
             
             // 开始游戏
@@ -608,6 +675,7 @@
                     
                     document.getElementById('startBtn').disabled = true;
                     document.getElementById('pauseBtn').disabled = false;
+                    document.getElementById('gameOverScreen').style.display = 'none';
                 }
             }
             
@@ -616,7 +684,7 @@
                 if (gameState.isRunning) {
                     gameState.isPaused = !gameState.isPaused;
                     document.getElementById('pauseBtn').textContent = 
-                        gameState.isPaused ? '继续游戏' : '暂停游戏';
+                        gameState.isPaused ? '继续' : '暂停';
                 }
             }
             
@@ -627,7 +695,8 @@
                 
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('pauseBtn').disabled = true;
-                document.getElementById('pauseBtn').textContent = '暂停游戏';
+                document.getElementById('pauseBtn').textContent = '暂停';
+                document.getElementById('gameOverScreen').style.display = 'none';
                 
                 drawGame();
                 updateUI();
@@ -646,29 +715,7 @@
                 document.getElementById('startBtn').addEventListener('click', startGame);
                 document.getElementById('pauseBtn').addEventListener('click', pauseGame);
                 document.getElementById('resetBtn').addEventListener('click', resetGame);
-                
-                // 键盘控制
-                document.addEventListener('keydown', function(e) {
-                    if (!gameState.isRunning || gameState.isPaused) return;
-                    
-                    switch(e.key) {
-                        case 'ArrowLeft':
-                            player.x = Math.max(0, player.x - player.speed);
-                            break;
-                        case 'ArrowRight':
-                            player.x = Math.min(canvas.width - player.width, player.x + player.speed);
-                            break;
-                        case 'ArrowUp':
-                            player.y = Math.max(0, player.y - player.speed);
-                            break;
-                        case 'ArrowDown':
-                            player.y = Math.min(canvas.height - player.height, player.y + player.speed);
-                            break;
-                        case ' ':
-                            shoot();
-                            break;
-                    }
-                });
+                document.getElementById('restartBtn').addEventListener('click', startGame);
                 
                 // 移动设备控制
                 const upBtn = document.querySelector('.dpad-button.up');
@@ -677,47 +724,35 @@
                 const rightBtn = document.querySelector('.dpad-button.right');
                 const shootBtn = document.getElementById('mobileShoot');
                 
-                // 添加触摸事件
-                [upBtn, downBtn, leftBtn, rightBtn].forEach(btn => {
-                    btn.addEventListener('touchstart', function(e) {
+                // 添加触摸事件 - 方向控制
+                function setupDirectionButton(button, direction) {
+                    button.addEventListener('touchstart', function(e) {
                         e.preventDefault();
-                        if (!gameState.isRunning || gameState.isPaused) return;
-                        
-                        switch(this.textContent) {
-                            case '↑':
-                                player.y = Math.max(0, player.y - player.speed);
-                                break;
-                            case '↓':
-                                player.y = Math.min(canvas.height - player.height, player.y + player.speed);
-                                break;
-                            case '←':
-                                player.x = Math.max(0, player.x - player.speed);
-                                break;
-                            case '→':
-                                player.x = Math.min(canvas.width - player.width, player.x + player.speed);
-                                break;
-                        }
+                        player.moving[direction] = true;
                     });
-                });
+                    
+                    button.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        player.moving[direction] = false;
+                    });
+                    
+                    // 防止按钮失去焦点
+                    button.addEventListener('touchcancel', function(e) {
+                        e.preventDefault();
+                        player.moving[direction] = false;
+                    });
+                }
                 
+                setupDirectionButton(upBtn, 'up');
+                setupDirectionButton(downBtn, 'down');
+                setupDirectionButton(leftBtn, 'left');
+                setupDirectionButton(rightBtn, 'right');
+                
+                // 射击按钮
                 shootBtn.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                     if (!gameState.isRunning || gameState.isPaused) return;
                     shoot();
-                });
-                
-                // 蓝牙连接模拟
-                document.getElementById('connectBtn').addEventListener('click', function() {
-                    const status = document.getElementById('connectionStatus');
-                    status.textContent = "正在搜索蓝牙设备...";
-                    
-                    // 模拟蓝牙连接过程
-                    setTimeout(() => {
-                        status.textContent = "已连接到控制器";
-                        status.style.color = "#4CAF50";
-                        this.disabled = true;
-                        this.textContent = "已连接";
-                    }, 2000);
                 });
                 
                 // 开始游戏循环
