@@ -2,7 +2,7 @@
 let currentUser = null; 
 let allUserData = []; 
 let unloginQuestionCount = 0; 
-const ADMIN_PASSWORD = "cmgk2024"; // 管理员密码，可修改
+const ADMIN_PASSWORD = "guyor37991733"; // 管理员密码，可修改
 // 分享海报模板
 const POSTER_TEMPLATE = `
     <div id="posterTemplate" style="width: 300px; height: 500px; background: url('https://picsum.photos/id/1060/300/500'); background-size: cover; padding: 20px; color: #8B4513; text-align: center;">
@@ -663,4 +663,5 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initGame);
 } else {
     initGame();
+
 }
