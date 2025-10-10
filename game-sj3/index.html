@@ -338,7 +338,7 @@
             }
         }
         
-        /* 横屏模式 */
+        /* 横屏模式 - 修复控制键显示问题 */
         @media (max-width: 768px) and (orientation: landscape) {
             .game-container {
                 flex-direction: row;
@@ -355,12 +355,20 @@
             }
             
             .mobile-controller {
+                display: flex;
                 height: 100px;
+                padding: 10px;
             }
             
             .dpad {
                 width: 150px;
                 height: 150px;
+            }
+            
+            .action-button {
+                width: 70px;
+                height: 70px;
+                font-size: 1rem;
             }
         }
         
@@ -578,8 +586,13 @@
                     this.height = 40;
                     this.x = Math.random() * (canvas.width - this.width);
                     this.y = -this.height;
-                    // 降低敌机速度
-                    this.speed = 1 + Math.random() * 1 + gameState.level * 0.2;
+                    // 降低敌机速度，特别是在9000分以内
+                    let baseSpeed = 1 + Math.random() * 0.5; // 降低基础速度
+                    // 9000分以内进一步降低速度
+                    if (gameState.score < 9000) {
+                        baseSpeed *= 0.7; // 降低30%的速度
+                    }
+                    this.speed = baseSpeed + gameState.level * 0.1; // 降低等级对速度的影响
                     this.color = `hsl(${Math.random() * 60}, 100%, 50%)`;
                 }
                 
@@ -765,7 +778,8 @@
             
             // 生成敌机 - 降低生成频率
             function spawnEnemy() {
-                if (Math.random() < 0.02 + gameState.level * 0.002) {
+                // 减少敌机生成概率
+                if (Math.random() < 0.015 + gameState.level * 0.001) {
                     gameState.enemies.push(new Enemy());
                 }
             }
